@@ -1,7 +1,14 @@
 import { Card } from "@/components/ui/card";
-import { Package, Users, TrendingUp, Award, AlertTriangle } from "lucide-react";
+import { Package, Users, DollarSign, Award, AlertTriangle } from "lucide-react";
+import { useProducts } from "@/context/ProductContext";
 
 const Dashboard = () => {
+  const { products, getTotalInventoryValue } = useProducts();
+  
+  const totalInventoryValue = getTotalInventoryValue();
+  const totalProducts = products.length;
+  const lowStockProducts = products.filter(p => p.stock < 10);
+
   const stats = [
     {
       title: "Usuarios Registrados",
@@ -11,17 +18,17 @@ const Dashboard = () => {
       color: "text-accent",
     },
     {
-      title: "Productos Vendidos",
-      value: "8,432",
-      icon: TrendingUp,
-      change: "+23.1%",
+      title: "Valor Total Inventario",
+      value: `$${totalInventoryValue.toLocaleString("es-CL")}`,
+      icon: DollarSign,
+      change: "Actualizado",
       color: "text-primary",
     },
     {
       title: "Productos Únicos",
-      value: "156",
+      value: totalProducts.toString(),
       icon: Package,
-      change: "+5.2%",
+      change: "En catálogo",
       color: "text-accent",
     },
     {
@@ -31,13 +38,6 @@ const Dashboard = () => {
       change: "+18.7%",
       color: "text-primary",
     },
-  ];
-
-  const lowStockProducts = [
-    { id: "PROD-001", name: "Teclado Mecánico RGB", stock: 3, marca: "Razer" },
-    { id: "PROD-015", name: "Mouse Gamer Inalámbrico", stock: 5, marca: "Logitech" },
-    { id: "PROD-023", name: "Monitor 27'' 144Hz", stock: 2, marca: "ASUS" },
-    { id: "PROD-034", name: "Auriculares Gaming", stock: 4, marca: "HyperX" },
   ];
 
   return (
@@ -55,7 +55,7 @@ const Dashboard = () => {
               <div>
                 <p className="text-sm text-muted-foreground mb-1">{stat.title}</p>
                 <h3 className="text-3xl font-bold mb-2">{stat.value}</h3>
-                <p className={`text-sm ${stat.color} font-medium`}>{stat.change} vs mes anterior</p>
+                <p className={`text-sm ${stat.color} font-medium`}>{stat.change}</p>
               </div>
               <div className={`p-3 rounded-lg bg-secondary/50 ${stat.color}`}>
                 <stat.icon className="w-6 h-6" />
@@ -70,18 +70,31 @@ const Dashboard = () => {
         <div className="flex items-center gap-2 mb-4">
           <AlertTriangle className="w-5 h-5 text-destructive" />
           <h2 className="text-xl font-bold">Productos con Bajo Stock</h2>
+          <span className="text-sm text-muted-foreground ml-auto">
+            ({lowStockProducts.length} productos)
+          </span>
         </div>
         <div className="space-y-3">
-          {lowStockProducts.map((product) => (
+          {lowStockProducts.slice(0, 4).map((product) => (
             <div
-              key={product.id}
+              key={product.codigo}
               className="flex items-center justify-between p-4 bg-secondary/30 rounded-lg border border-border hover:border-primary/50 transition-colors"
             >
-              <div className="flex-1">
-                <p className="font-semibold">{product.name}</p>
-                <p className="text-sm text-muted-foreground">
-                  {product.marca} • {product.id}
-                </p>
+              <div className="flex items-center gap-4 flex-1">
+                <img 
+                  src={product.imagen} 
+                  alt={product.nombre}
+                  className="w-12 h-12 object-cover rounded-lg border border-border"
+                  onError={(e) => {
+                    e.currentTarget.src = "/placeholder.svg";
+                  }}
+                />
+                <div>
+                  <p className="font-semibold">{product.nombre}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {product.marca} • {product.codigo}
+                  </p>
+                </div>
               </div>
               <div className="text-right">
                 <p className="text-sm text-muted-foreground">Stock restante</p>
