@@ -1,0 +1,123 @@
+[
+  {
+    "id": "1",
+    "tipo": "evento",
+    "titulo": "Gran Torneo de Apertura 2025",
+    "descripcion": "Únete al evento de esports más grande del año. Competencias de Valorant, LoL y más. ¡Premios millonarios y gloria eterna te esperan!",
+    "fecha": "2025-01-15",
+    "horaInicio": "10:00",
+    "horaFin": "22:00",
+    "direccion": "Movistar Arena, Santiago",
+    "ubicacionUrl": "https://www.google.com/maps/search/?api=1&query=Movistar+Arena,+Santiago",
+    "imagen": "/images/inicio/banner_inicio.png",
+    "videoUrl": "https://www.youtube.com/watch?v=C3GouGa0noM",
+    "autor": "LevelUp Esports",
+    "categoria": "Torneos",
+    "puntos": 1000,
+    "estado": "activo",
+    "contenidoCompleto": "El Gran Torneo de Apertura 2025 reunirá a los mejores equipos de la región en una batalla épica por la supremacía. \n\nEste año, el Movistar Arena se transformará en el coliseo definitivo del gaming. Contaremos con:\n- **Torneos Principales:** Valorant y League of Legends con un prize pool de $10.000.000 CLP.\n- **Zona Free Play:** Más de 50 estaciones con las últimas consolas y PCs de alta gama para que pruebes los lanzamientos más recientes.\n- **Cosplay Contest:** Ven con tu mejor traje y participa por premios exclusivos de nuestros patrocinadores.\n- **Meet & Greet:** Conoce a tus streamers y pro-players favoritos de la escena local.\n\nNo te pierdas la oportunidad de ser parte de la historia. ¡Inscríbete ahora y demuestra que eres el mejor!",
+    "tiempoLectura": 5,
+    "etiquetas": [
+      "esports",
+      "torneo",
+      "valorant",
+      "lol"
+    ]
+  },
+  {
+    "id": "2",
+    "tipo": "evento",
+    "titulo": "Lanzamiento Nuevas Tecnologías",
+    "descripcion": "Descubre lo último en hardware gaming. Presentación exclusiva de nuevas tarjetas gráficas y periféricos de última generación.",
+    "fecha": "2025-02-10",
+    "horaInicio": "18:30",
+    "horaFin": "21:00",
+    "direccion": "Costanera Center, Santiago",
+    "ubicacionUrl": "https://www.google.com/maps/search/?api=1&query=Costanera+Center,+Santiago",
+    "imagen": "/images/inicio/tarjeta_tecnologia.png",
+    "videoUrl": "https://www.youtube.com/watch?v=aJwMEQqwDSo",
+    "autor": "LevelUp Tech",
+    "categoria": "Tecnología",
+    "puntos": 500,
+    "estado": "programado",
+    "contenidoCompleto": "Ven a conocer de primera mano la nueva generación de hardware que revolucionará tu experiencia de juego. \n\nEn este evento exclusivo, presentaremos:\n- La nueva serie de tarjetas gráficas RTX 5000, con rendimiento de IA mejorado.\n- Monitores OLED de 360Hz para una fluidez sin precedentes.\n- La nueva línea de periféricos inalámbricos con latencia cero.\n\nTendremos demos en vivo donde podrás probar todo el equipamiento, charlas técnicas con ingenieros de las marcas líderes y sorteos de hardware entre los asistentes. ¡El futuro del gaming comienza aquí!",
+    "tiempoLectura": 3,
+    "etiquetas": [
+      "hardware",
+      "lanzamiento",
+      "tecnologia"
+    ]
+  },
+  {
+    "id": "3",
+    "tipo": "evento",
+    "titulo": "Reunión Mensual de la Comunidad",
+    "descripcion": "Un espacio para compartir, jugar y conocer a otros miembros de la comunidad LevelUp. ¡Comida, juegos y buena onda garantizada!",
+    "fecha": "2025-01-25",
+    "horaInicio": "16:00",
+    "horaFin": "20:00",
+    "direccion": "Parque Araucano, Las Condes",
+    "ubicacionUrl": "https://www.google.com/maps/search/?api=1&query=Parque+Araucano,+Las+Condes",
+    "imagen": "/images/inicio/tarjeta_comunidad.png",
+    "videoUrl": "https://www.youtube.com/watch?v=aJwMEQqwDSo",
+    "autor": "Comunidad LevelUp",
+    "categoria": "Comunidad",
+    "puntos": 300,
+    "estado": "activo",
+    "contenidoCompleto": "Nuestra reunión mensual es el momento perfecto para desconectarse de las clases y disfrutar con amigos que comparten tu pasión. \n\nEn esta edición tendremos:\n- **Torneos Relámpago:** Smash Bros Ultimate y Mario Kart 8 Deluxe.\n- **Juegos de Mesa:** Una ludoteca completa a tu disposición.\n- **Zona Retro:** Consolas clásicas para los nostálgicos.\n- **Comida y Bebida:** Pizza y bebidas gratis para todos los miembros registrados.\n\nEs la oportunidad ideal para encontrar equipo para el próximo torneo o simplemente pasar una tarde increíble. ¡Te esperamos!",
+    "tiempoLectura": 2,
+    "etiquetas": [
+      "comunidad",
+      "meetup",
+      "social"
+    ]
+  },
+  {
+    "id": "4",
+    "tipo": "evento",
+    "titulo": "Webinar: Tendencias Tech 2025",
+    "descripcion": "Expertos hablan sobre las tendencias tecnológicas del año. IA, VR y el futuro del desarrollo de videojuegos.",
+    "fecha": "2025-10-10",
+    "horaInicio": "19:00",
+    "horaFin": "20:30",
+    "direccion": "Online - Transmisión en Vivo",
+    "ubicacionUrl": "https://www.youtube.com/levelup",
+    "imagen": "/images/inicio/tarjeta_tecnologia.png",
+    "videoUrl": "https://www.youtube.com/watch?v=aJwMEQqwDSo",
+    "autor": "LevelUp Team",
+    "categoria": "Tecnología",
+    "puntos": 300,
+    "estado": "finalizado",
+    "contenidoCompleto": "Revive nuestro webinar sobre las tecnologías que marcarán el 2025. \n\nAnalizamos en profundidad:\n- El impacto de la Inteligencia Artificial Generativa en la creación de assets para videojuegos.\n- El futuro de la Realidad Virtual y Aumentada más allá del gaming.\n- Las nuevas herramientas de desarrollo que están democratizando la creación de juegos.\n\nUn panel de expertos de la industria comparte su visión y responde preguntas de la audiencia. Ideal para estudiantes de informática y diseño de videojuegos.",
+    "tiempoLectura": 5,
+    "etiquetas": [
+      "webinar",
+      "tecnologia",
+      "ia"
+    ]
+  },
+  {
+    "id": "5",
+    "tipo": "evento",
+    "titulo": "Black Friday LevelUp",
+    "descripcion": "Evento especial con descuentos y puntos dobles en toda la tienda. ¡Las mejores ofertas del año están aquí!",
+    "fecha": "2025-11-29",
+    "horaInicio": "00:00",
+    "horaFin": "23:59",
+    "direccion": "Todas las tiendas LevelUp",
+    "ubicacionUrl": "https://levelup.cl/tiendas",
+    "imagen": "/images/inicio/banner_carrito.png",
+    "videoUrl": "https://www.youtube.com/watch?v=aJwMEQqwDSo",
+    "autor": "LevelUp Store",
+    "categoria": "Promociones",
+    "puntos": 1000,
+    "estado": "programado",
+    "contenidoCompleto": "Prepárate para las mejores ofertas del año. Este Black Friday en LevelUp tiramos la casa por la ventana.\n\n- **Descuentos Masivos:** Hasta 70% de descuento en juegos, 50% en periféricos y 30% en consolas.\n- **Puntos Dobles:** Todas tus compras acumulan el doble de puntos LevelUp para canjear por recompensas.\n- **Flash Sales:** Ofertas relámpago cada hora con stock limitado.\n\nNo dejes pasar esta oportunidad de renovar tu setup al mejor precio. ¡Activa las notificaciones y sé el primero en comprar!",
+    "tiempoLectura": 2,
+    "etiquetas": [
+      "black friday",
+      "ofertas",
+      "promociones"
+    ]
+  }
+]

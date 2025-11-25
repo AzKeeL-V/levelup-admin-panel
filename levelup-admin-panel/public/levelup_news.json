@@ -1,0 +1,58 @@
+[
+    {
+        "id": "news_1",
+        "tipo": "video",
+        "titulo": "Review: Nuevo Mouse Logitech G Pro X",
+        "descripcion": "Análisis completo del último lanzamiento de Logitech. Probamos su sensor HERO 25K, la latencia inalámbrica y la duración de la batería en sesiones intensas de gaming.",
+        "fecha": "2025-10-20",
+        "estado": "activo",
+        "autor": "TechReviewer",
+        "categoria": "Hardware",
+        "imagen": "/images/blog_noticia/controlador_juego.png",
+        "contenidoCompleto": "El Logitech G Pro X Superlight es uno de los ratones más ligeros del mercado...",
+        "tiempoLectura": 5,
+        "etiquetas": [
+            "hardware",
+            "review",
+            "logitech",
+            "mouse"
+        ]
+    },
+    {
+        "id": "news_2",
+        "tipo": "nota",
+        "titulo": "Guía: Cómo elegir tu primer setup gaming",
+        "descripcion": "Tips y recomendaciones para armar tu setup ideal. Desde la elección del procesador hasta la importancia de una buena silla ergonómica.",
+        "fecha": "2025-10-18",
+        "estado": "activo",
+        "autor": "LevelUp Guías",
+        "categoria": "Guías",
+        "imagen": "/images/blog_noticia/pc_gaming.png",
+        "contenidoCompleto": "Armar tu primer PC Gamer puede ser intimidante. En esta guía te explicamos paso a paso...",
+        "tiempoLectura": 8,
+        "etiquetas": [
+            "guia",
+            "setup",
+            "pc gamer",
+            "principiantes"
+        ]
+    },
+    {
+        "id": "news_3",
+        "tipo": "nota",
+        "titulo": "El futuro de los Esports en Chile",
+        "descripcion": "Entrevista con los principales organizadores de torneos nacionales y su visión para el 2026.",
+        "fecha": "2025-11-05",
+        "estado": "activo",
+        "autor": "Esports Daily",
+        "categoria": "Esports",
+        "imagen": "/images/blog_noticia/esports.png",
+        "contenidoCompleto": "Chile se está posicionando como un hub importante para los Esports en Latinoamérica...",
+        "tiempoLectura": 6,
+        "etiquetas": [
+            "esports",
+            "chile",
+            "entrevista"
+        ]
+    }
+]

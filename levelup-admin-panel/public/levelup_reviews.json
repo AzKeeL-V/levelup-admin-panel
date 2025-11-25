@@ -1,0 +1,143 @@
+[
+  {
+    "id": "review_1",
+    "productId": "1",
+    "userId": "1",
+    "rating": 5,
+    "titulo": "Excelente producto",
+    "comentario": "El producto llegó en perfectas condiciones y funciona de maravilla. Muy recomendado para gamers.",
+    "fechaCreacion": "2024-12-01T10:00:00.000Z",
+    "aprobado": true,
+    "util": 12,
+    "noUtil": 1
+  },
+  {
+    "id": "review_2",
+    "productId": "1",
+    "userId": "2",
+    "rating": 4,
+    "titulo": "Buena calidad",
+    "comentario": "Buen producto, aunque el envío tardó un poco más de lo esperado. La calidad es excelente.",
+    "fechaCreacion": "2024-12-05T14:30:00.000Z",
+    "aprobado": true,
+    "util": 8,
+    "noUtil": 0
+  },
+  {
+    "id": "review_3",
+    "productId": "2",
+    "userId": "3",
+    "rating": 5,
+    "titulo": "Increíble experiencia",
+    "comentario": "Este juego es increíble. Las mecánicas son perfectas y el diseño es espectacular.",
+    "fechaCreacion": "2024-12-10T09:15:00.000Z",
+    "aprobado": true,
+    "util": 15,
+    "noUtil": 2
+  },
+  {
+    "id": "review_4",
+    "productId": "3",
+    "userId": "1",
+    "rating": 4,
+    "titulo": "Buena inversión",
+    "comentario": "El controlador funciona muy bien, buena calidad de construcción y respuesta precisa.",
+    "fechaCreacion": "2024-12-12T16:45:00.000Z",
+    "aprobado": true,
+    "util": 6,
+    "noUtil": 1
+  },
+  {
+    "id": "review_5",
+    "productId": "4",
+    "userId": "4",
+    "rating": 5,
+    "titulo": "Sonido excepcional",
+    "comentario": "Los auriculares tienen un sonido increíble. Perfectos para gaming y música.",
+    "fechaCreacion": "2024-12-15T11:20:00.000Z",
+    "aprobado": true,
+    "util": 9,
+    "noUtil": 0
+  },
+  {
+    "id": "review_6",
+    "productId": "5",
+    "userId": "5",
+    "rating": 3,
+    "titulo": "Regular",
+    "comentario": "El mouse funciona bien, pero esperaba mejor precisión. Es funcional para uso básico.",
+    "fechaCreacion": "2024-12-18T13:10:00.000Z",
+    "aprobado": true,
+    "util": 4,
+    "noUtil": 3
+  },
+  {
+    "id": "review_7",
+    "productId": "6",
+    "userId": "2",
+    "rating": 4,
+    "titulo": "Buen mousepad",
+    "comentario": "Buena superficie para gaming, se siente premium y el deslizamiento es suave.",
+    "fechaCreacion": "2024-12-20T15:30:00.000Z",
+    "aprobado": true,
+    "util": 7,
+    "noUtil": 1
+  },
+  {
+    "id": "review_8",
+    "productId": "7",
+    "userId": "3",
+    "rating": 5,
+    "titulo": "PC de ensueño",
+    "comentario": "Esta PC es una bestia. Corre todos los juegos en ultra sin problemas. Altamente recomendado.",
+    "fechaCreacion": "2024-12-22T17:45:00.000Z",
+    "aprobado": true,
+    "util": 18,
+    "noUtil": 0
+  },
+  {
+    "id": "review_9",
+    "productId": "8",
+    "userId": "1",
+    "rating": 5,
+    "titulo": "Consola perfecta",
+    "comentario": "PlayStation 5 es increíble. Los juegos se ven y juegan de maravilla. La espera valió la pena.",
+    "fechaCreacion": "2024-12-25T12:00:00.000Z",
+    "aprobado": true,
+    "util": 22,
+    "noUtil": 1
+  },
+  {
+    "id": "review_10",
+    "productId": "9",
+    "userId": "4",
+    "rating": 4,
+    "titulo": "Cómoda y ergonómica",
+    "comentario": "La silla es muy cómoda para largas sesiones de gaming. Buena calidad de materiales.",
+    "fechaCreacion": "2024-12-28T10:15:00.000Z",
+    "aprobado": true,
+    "util": 11,
+    "noUtil": 2
+  },
+  {
+    "id": "review_11",
+    "productId": "10",
+    "userId": "5",
+    "rating": 5,
+    "titulo": "Polera genial",
+    "comentario": "Me encanta el diseño de la polera. La calidad de impresión es excelente y es muy cómoda.",
+    "fechaCreacion": "2024-12-30T14:20:00.000Z",
+    "aprobado": true,
+    "util": 5,
+    "noUtil": 0
+  },
+  {
+    "id": "review_12",
+    "productId": "JM001",
+    "userId": "user2",
+    "comentario": "Catan es muy entretenido, lo jugamos en familia y todos lo disfrutaron.",
+    "calificacion": 5,
+    "aprobado": true,
+    "fechaCreacion": "2025-11-10T18:00:00.000Z"
+  }
+]

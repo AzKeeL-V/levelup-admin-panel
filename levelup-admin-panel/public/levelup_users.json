@@ -1,0 +1,242 @@
+[
+  {
+    "id": "admin123",
+    "nombre": "Administrador LevelUp",
+    "correo": "admin@levelup.cl",
+    "contraseña": "adminpass",
+    "rut": "",
+    "tipo": "normal",
+    "puntos": 0,
+    "nivel": "diamante",
+    "telefono": null,
+    "intereses": [],
+    "aceptaTerminos": true,
+    "aceptaPoliticaPrivacidad": true,
+    "captchaVerificado": true,
+    "fechaRegistro": "2024-01-01T00:00:00.000Z",
+    "activo": true,
+    "codigoReferido": "ADMIN001",
+    "rol": "admin",
+    "referidoPor": null,
+    "preferenciasComunicacion": {
+      "email": true,
+      "sms": false,
+      "push": false
+    },
+    "newsletter": false
+  },
+  {
+    "id": "1",
+    "nombre": "Juan Pérez",
+    "correo": "juan.perez@duocuc.cl",
+    "contraseña": "$2b$10$hashedpassword1",
+    "rut": "12.345.678-9",
+    "tipo": "duoc",
+    "puntos": 1250,
+    "nivel": "diamante",
+    "telefono": "+56912345678",
+    "direcciones": [
+      {
+        "calle": "Avenida Providencia",
+        "numero": "123",
+        "edificio": "4B",
+        "comuna": "Providencia",
+        "region": "Metropolitana",
+        "codigoPostal": "7500000",
+        "pais": "Chile"
+      }
+    ],
+    "metodoPagoPreferido": "tarjeta",
+    "tarjeta": {
+      "numero": "**** **** **** 1234",
+      "fechaExpiracion": "12/26",
+      "titular": "Juan Pérez"
+    },
+    "preferenciasComunicacion": {
+      "email": true,
+      "sms": true,
+      "push": false
+    },
+    "newsletter": true,
+    "intereses": ["Gaming", "Tecnología", "Deportes"],
+    "aceptaTerminos": true,
+    "aceptaPoliticaPrivacidad": true,
+    "captchaVerificado": true,
+    "fechaRegistro": "2024-01-15",
+    "ultimoAcceso": "2025-01-27",
+    "activo": true,
+    "codigoReferido": "REF1"
+  },
+  {
+    "id": "2",
+    "nombre": "María González",
+    "correo": "maria.gonzalez@gmail.com",
+    "contraseña": "$2b$10$hashedpassword2",
+    "rut": "23.456.789-0",
+    "tipo": "normal",
+    "puntos": 650,
+    "nivel": "oro",
+    "telefono": "+56987654321",
+    "direcciones": [
+      {
+        "calle": "Calle Las Condes",
+        "numero": "456",
+        "edificio": null,
+        "comuna": "Las Condes",
+        "region": "Metropolitana",
+        "codigoPostal": "7550000",
+        "pais": "Chile"
+      }
+    ],
+    "metodoPagoPreferido": "transferencia",
+    "preferenciasComunicacion": {
+      "email": true,
+      "sms": false,
+      "push": true
+    },
+    "newsletter": false,
+    "intereses": ["Libros", "Música"],
+    "aceptaTerminos": true,
+    "aceptaPoliticaPrivacidad": true,
+    "captchaVerificado": true,
+    "fechaRegistro": "2024-03-22",
+    "ultimoAcceso": "2025-01-26",
+    "activo": true,
+    "codigoReferido": "REF2"
+  },
+  {
+    "id": "3",
+    "nombre": "Carlos Silva",
+    "correo": "carlos.silva@duocuc.cl",
+    "contraseña": "$2b$10$hashedpassword3",
+    "rut": "34.567.890-1",
+    "tipo": "duoc",
+    "puntos": 320,
+    "nivel": "plata",
+    "telefono": "+56955556666",
+    "direcciones": [
+      {
+        "calle": "Avenida La Florida",
+        "numero": "789",
+        "edificio": "12A",
+        "comuna": "La Florida",
+        "region": "Metropolitana",
+        "codigoPostal": "8240000",
+        "pais": "Chile"
+      }
+    ],
+    "metodoPagoPreferido": "efectivo",
+    "preferenciasComunicacion": {
+      "email": false,
+      "sms": true,
+      "push": false
+    },
+    "newsletter": true,
+    "intereses": ["Gaming", "Películas"],
+    "aceptaTerminos": true,
+    "aceptaPoliticaPrivacidad": true,
+    "captchaVerificado": true,
+    "fechaRegistro": "2024-06-10",
+    "ultimoAcceso": "2025-01-25",
+    "activo": true,
+    "codigoReferido": "REF3"
+  },
+  {
+    "id": "4",
+    "nombre": "Ana Morales",
+    "correo": "ana.morales@outlook.com",
+    "contraseña": "$2b$10$hashedpassword4",
+    "rut": "45.678.901-2",
+    "tipo": "normal",
+    "puntos": 85,
+    "nivel": "bronce",
+    "telefono": "+56944443333",
+    "direcciones": [
+      {
+        "calle": "Calle Ejemplo",
+        "numero": "123",
+        "comuna": "Santiago",
+        "region": "Metropolitana",
+        "codigoPostal": "12345",
+        "pais": "Chile"
+      }
+    ],
+    "preferenciasComunicacion": {
+      "email": true,
+      "sms": false,
+      "push": false
+    },
+    "newsletter": false,
+    "intereses": ["Arte", "Viajes"],
+    "aceptaTerminos": true,
+    "aceptaPoliticaPrivacidad": true,
+    "captchaVerificado": true,
+    "fechaRegistro": "2024-09-05",
+    "ultimoAcceso": "2025-01-20",
+    "activo": true,
+    "codigoReferido": "REF4"
+  },
+  {
+    "id": "5",
+    "nombre": "Luis Campos",
+    "correo": "luis.campos@duocuc.cl",
+    "contraseña": "$2b$10$hashedpassword5",
+    "rut": "56.789.012-3",
+    "tipo": "duoc",
+    "puntos": 2100,
+    "nivel": "diamante",
+    "telefono": "+56977778888",
+    "direcciones": [
+      {
+        "calle": "Calle Vitacura",
+        "numero": "321",
+        "comuna": "Vitacura",
+        "region": "Metropolitana",
+        "codigoPostal": "7630000",
+        "pais": "Chile"
+      }
+    ],
+    "metodoPagoPreferido": "paypal",
+    "preferenciasComunicacion": {
+      "email": true,
+      "sms": true,
+      "push": true
+    },
+    "newsletter": true,
+    "intereses": ["Tecnología", "Gaming", "Deportes"],
+    "aceptaTerminos": true,
+    "aceptaPoliticaPrivacidad": true,
+    "captchaVerificado": true,
+    "fechaRegistro": "2023-12-01",
+    "ultimoAcceso": "2025-01-27",
+    "activo": true,
+    "codigoReferido": "REF5"
+  },
+  {
+    "id": "user2",
+    "nombre": "María González",
+    "correo": "maria.gonzalez@gmail.com",
+    "contraseña": "userpass2",
+    "rut": "23.456.789-0",
+    "tipo": "normal",
+    "puntos": 800,
+    "nivel": "plata",
+    "telefono": "+56987654321",
+    "direcciones": [],
+    "intereses": ["Libros", "Música"],
+    "aceptaTerminos": true,
+    "aceptaPoliticaPrivacidad": true,
+    "captchaVerificado": true,
+    "fechaRegistro": "2024-05-10T00:00:00.000Z",
+    "activo": true,
+    "codigoReferido": "REF2",
+    "rol": "usuario",
+    "referidoPor": null,
+    "preferenciasComunicacion": {
+      "email": true,
+      "sms": false,
+      "push": false
+    },
+    "newsletter": false
+  }
+]

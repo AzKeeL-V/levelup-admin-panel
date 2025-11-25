@@ -1,0 +1,176 @@
+[
+  {
+    "id": "1",
+    "userId": "1",
+    "userName": "Juan Pérez",
+    "userEmail": "juan.perez@duocuc.cl",
+    "items": [
+      {
+        "id": "1",
+        "productId": "JM001",
+        "productName": "Catan",
+        "productImage": "/images/products/catan.jpg",
+        "quantity": 1,
+        "unitPrice": 29990,
+        "totalPrice": 29990,
+        "puntosGanados": 150
+      },
+      {
+        "id": "2",
+        "productId": "AC001",
+        "productName": "Controlador Inalámbrico Xbox Series X",
+        "productImage": "/images/products/xbox-controller.jpg",
+        "quantity": 2,
+        "unitPrice": 59990,
+        "totalPrice": 119980,
+        "puntosGanados": 600
+      }
+    ],
+    "subtotal": 149970,
+    "descuento": 0,
+    "total": 149970,
+    "puntosUsados": 0,
+    "puntosGanados": 750,
+    "estado": "entregado",
+    "fechaCreacion": "2025-01-20",
+    "fechaActualizacion": "2025-01-25",
+    "direccionEnvio": {
+      "nombre": "Juan Pérez",
+      "calle": "Avenida Providencia",
+      "numero": "123",
+      "apartamento": "4B",
+      "ciudad": "Santiago",
+      "region": "Metropolitana",
+      "codigoPostal": "7500000",
+      "pais": "Chile",
+      "telefono": "+56912345678"
+    },
+    "metodoPago": "tarjeta",
+    "numeroOrden": "LV-2025-0001"
+  },
+  {
+    "id": "2",
+    "userId": "2",
+    "userName": "María González",
+    "userEmail": "maria.gonzalez@gmail.com",
+    "items": [
+      {
+        "id": "3",
+        "productId": "AC002",
+        "productName": "Auriculares Gamer HyperX Cloud II",
+        "productImage": "/images/products/hyperx-cloud2.jpg",
+        "quantity": 1,
+        "unitPrice": 79990,
+        "totalPrice": 79990,
+        "puntosGanados": 400
+      }
+    ],
+    "subtotal": 79990,
+    "descuento": 5000,
+    "total": 74990,
+    "puntosUsados": 100,
+    "puntosGanados": 400,
+    "estado": "enviado",
+    "fechaCreacion": "2025-01-25",
+    "fechaActualizacion": "2025-01-26",
+    "direccionEnvio": {
+      "nombre": "María González",
+      "calle": "Calle Las Condes",
+      "numero": "456",
+      "ciudad": "Santiago",
+      "region": "Metropolitana",
+      "codigoPostal": "7550000",
+      "pais": "Chile",
+      "telefono": "+56987654321"
+    },
+    "metodoPago": "transferencia",
+    "numeroOrden": "LV-2025-0002"
+  },
+  {
+    "id": "3",
+    "userId": "3",
+    "userName": "Carlos Silva",
+    "userEmail": "carlos.silva@duocuc.cl",
+    "items": [
+      {
+        "id": "4",
+        "productId": "MS001",
+        "productName": "Mouse Gamer Logitech G502 HERO",
+        "productImage": "/images/products/logitech-g502.jpg",
+        "quantity": 1,
+        "unitPrice": 49990,
+        "totalPrice": 49990,
+        "puntosGanados": 250
+      }
+    ],
+    "subtotal": 49990,
+    "descuento": 0,
+    "total": 49990,
+    "puntosUsados": 0,
+    "puntosGanados": 250,
+    "estado": "procesando",
+    "fechaCreacion": "2025-01-26",
+    "fechaActualizacion": "2025-01-26",
+    "direccionEnvio": {
+      "nombre": "Carlos Silva",
+      "calle": "Avenida La Florida",
+      "numero": "789",
+      "apartamento": "12A",
+      "ciudad": "Santiago",
+      "region": "Metropolitana",
+      "codigoPostal": "8240000",
+      "pais": "Chile",
+      "telefono": "+56955556666"
+    },
+    "metodoPago": "tarjeta",
+    "numeroOrden": "LV-2025-0003"
+  },
+  {
+    "id": "4",
+    "userId": "5",
+    "userName": "Luis Campos",
+    "userEmail": "luis.campos@duocuc.cl",
+    "items": [
+      {
+        "id": "5",
+        "productId": "JM002",
+        "productName": "Carcassonne",
+        "productImage": "/images/products/carcassonne.jpg",
+        "quantity": 2,
+        "unitPrice": 24990,
+        "totalPrice": 49980,
+        "puntosGanados": 250
+      },
+      {
+        "id": "6",
+        "productId": "PP001",
+        "productName": "Polera Gamer Personalizada 'Level-Up'",
+        "productImage": "/images/products/polera-levelup.jpg",
+        "quantity": 3,
+        "unitPrice": 14990,
+        "totalPrice": 44970,
+        "puntosGanados": 225
+      }
+    ],
+    "subtotal": 94950,
+    "descuento": 10000,
+    "total": 84950,
+    "puntosUsados": 200,
+    "puntosGanados": 475,
+    "estado": "pendiente",
+    "fechaCreacion": "2025-01-27",
+    "fechaActualizacion": "2025-01-27",
+    "direccionEnvio": {
+      "nombre": "Luis Campos",
+      "calle": "Calle Vitacura",
+      "numero": "321",
+      "ciudad": "Santiago",
+      "region": "Metropolitana",
+      "codigoPostal": "7630000",
+      "pais": "Chile",
+      "telefono": "+56977778888"
+    },
+    "metodoPago": "efectivo",
+    "numeroOrden": "LV-2025-0004"
+  }
+]
