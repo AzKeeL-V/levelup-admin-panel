@@ -361,7 +361,7 @@ const Checkout = () => {
                               selectedAddressIndex: index,
                               calle: address.calle,
                               numero: address.numero,
-                              apartamento: address.edificio || address.apartamento || "",
+                              apartamento: address.apartamento || "",
                               ciudad: address.ciudad || address.comuna || "",
                               region: regionValue,
                               codigoPostal: address.codigoPostal || ""
@@ -377,7 +377,7 @@ const Checkout = () => {
                           <Label htmlFor={`address-${index}`} className="flex-1 cursor-pointer">
                             <div className="text-white text-sm">
                               <p className="font-medium">{address.calle} {address.numero}</p>
-                              {(address.edificio || address.apartamento) && <p>{address.edificio || address.apartamento}</p>}
+                              {address.apartamento && <p>{address.apartamento}</p>}
                               <p>{address.ciudad || address.comuna}, {normalizeRegion(address.region || "")}</p>
                               {address.codigoPostal && <p>Código Postal: {address.codigoPostal}</p>}
                             </div>

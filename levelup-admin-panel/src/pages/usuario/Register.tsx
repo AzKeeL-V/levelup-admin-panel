@@ -36,7 +36,7 @@ const Register = () => {
     contraseña: "",
     confirmarContraseña: "",
     telefono: "+569",
-    direcciones: [{ calle: "", numero: "", edificio: "", region: "", ciudad: "" }],
+    direcciones: [{ calle: "", numero: "", apartamento: "", region: "", ciudad: "" }],
     tarjeta: {
       tipo: "",
       numero: "",
@@ -54,7 +54,7 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [tipoUsuario, setTipoUsuario] = useState<"normal" | "duoc">("normal");
 
-  const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
   const navigate = useNavigate();
 
   // Detectar tipo de usuario basado en el dominio del email
@@ -192,7 +192,7 @@ const Register = () => {
   };
 
   const addDireccion = () => {
-    setFormData(prev => ({ ...prev, direcciones: [...prev.direcciones, { calle: "", numero: "", edificio: "", region: "", ciudad: "" }]}));
+    setFormData(prev => ({ ...prev, direcciones: [...prev.direcciones, { calle: "", numero: "", apartamento: "", region: "", ciudad: "" }] }));
   };
 
   const removeDireccion = (index: number) => {
@@ -259,7 +259,7 @@ const Register = () => {
     // Validación de direcciones
     for (let i = 0; i < formData.direcciones.length; i++) {
       const dir = formData.direcciones[i];
-      if (dir.calle.trim() || dir.numero.trim() || dir.edificio.trim() || dir.region.trim() || dir.ciudad.trim()) {
+      if (dir.calle.trim() || dir.numero.trim() || dir.apartamento.trim() || dir.region.trim() || dir.ciudad.trim()) {
         // Si se llenó algún campo de la dirección, validar que todos los requeridos estén
         if (!dir.calle.trim()) return `La calle es requerida en la dirección ${i + 1}`;
         if (!dir.numero.trim()) return `El número es requerido en la dirección ${i + 1}`;
@@ -326,10 +326,10 @@ const Register = () => {
         nivel: "bronce" as "bronce" | "plata" | "oro" | "diamante",
         rol: (formData.correo === "admin@levelup.cl" ? "admin" : "user") as "admin" | "user", // Rol de administrador para el email específico
         telefono: formData.telefono,
-        direcciones: formData.direcciones.filter(d => d.calle.trim() || d.numero.trim() || d.edificio.trim()).map(d => ({
+        direcciones: formData.direcciones.filter(d => d.calle.trim() || d.numero.trim() || d.apartamento.trim()).map(d => ({
           calle: d.calle,
           numero: d.numero,
-          edificio: d.edificio || undefined,
+          apartamento: d.apartamento || undefined,
           ciudad: d.ciudad,
           region: d.region,
           codigoPostal: undefined,
@@ -720,12 +720,12 @@ const Register = () => {
                           />
                         </div>
                         <div>
-                          <Label htmlFor={`edificio-${index}`} className="text-xs text-slate-400">Edificio (opcional)</Label>
+                          <Label htmlFor={`apartamento-${index}`} className="text-xs text-slate-400">Apartamento (opcional)</Label>
                           <Input
-                            id={`edificio-${index}`}
+                            id={`apartamento-${index}`}
                             type="text"
-                            value={direccion.edificio}
-                            onChange={(e) => handleDireccionChange(index, "edificio", e.target.value)}
+                            value={direccion.apartamento}
+                            onChange={(e) => handleDireccionChange(index, "apartamento", e.target.value)}
                             placeholder="Edificio, piso, etc."
                             className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
                           />

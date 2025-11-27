@@ -36,6 +36,7 @@ public class User implements UserDetails {
     private String email;
 
     @Column(nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private String password;
 
     private String rut;
@@ -49,6 +50,11 @@ public class User implements UserDetails {
     private String nivel = "bronce"; // "bronce" | "plata" | "oro" | "diamante"
 
     private String telefono;
+
+    private String codigoReferido; // Código único de referido del usuario
+
+    @Builder.Default
+    private Boolean activo = true;
 
     @ElementCollection
     @CollectionTable(name = "user_addresses", joinColumns = @JoinColumn(name = "user_id"))

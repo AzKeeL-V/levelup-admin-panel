@@ -1,5 +1,5 @@
 import { Product } from "@/types/Product";
-import axiosInstance from "@/utils/axiosInstance"; // Usa la instancia de axios para backend
+import axiosInstance from "@/utils/axiosInstance";
 
 export class ProductRepository {
   private static readonly STORAGE_KEY = 'levelup_products';
@@ -144,116 +144,27 @@ export class ProductRepository {
         if (Array.isArray(parsed)) {
           return parsed;
         }
-        // Si los datos en localStorage no son un array válido, ignorarlos
-        console.warn("Invalid products data in localStorage, ignoring and loading from JSON");
       }
-      // Cargar desde JSON si no hay datos válidos en localStorage
+      // Fallback to JSON file if local storage is empty or invalid
       if (typeof fetch !== 'undefined') {
-        const response = await fetch('/levelup_products.json');
-        if (!response.ok) {
-          throw new Error('Error al cargar productos desde JSON');
+        try {
+          const response = await fetch('/levelup_products.json');
+          if (response.ok) {
+            const products = await response.json();
+            if (Array.isArray(products)) {
+              this.saveAll(products);
+              return products;
+            }
+          }
+        } catch (e) {
+          console.warn("Could not load products from JSON", e);
         }
-        const products = await response.json();
-        if (!Array.isArray(products)) {
-          throw new Error('Datos de productos desde JSON no son válidos');
-        }
-        this.saveAll(products);
-        return products;
       }
       return [];
     } catch (error) {
       console.error("Error getting products from storage:", error);
-      // Fallback a datos iniciales si falla la carga
-      this.saveAll(this.INITIAL_PRODUCTS);
       return this.INITIAL_PRODUCTS;
     }
-  }
-
-  private static isCodeDuplicate(products: Product[], codigo: string, currentCodigo?: string): boolean {
-    if (currentCodigo && codigo === currentCodigo) {
-      return false;
-    }
-    return products.some(p => p.codigo === codigo);
-  }
-
-  static async findAll(): Promise<Product[]> {
-    try {
-      // Si existe backend, usa axios. Si no, usa localStorage o JSON local.
-      try {
-        const response = await axiosInstance.get('/products');
-        return response.data;
-      } catch (err) {
-        // Si falla axios (no hay backend), usa localStorage o JSON local
-      }
-      const products = await this.getProductsFromStorage();
-      console.log("ProductRepository.findAll: Productos obtenidos:", products.length, products);
-      return products;
-    } catch (error) {
-      console.error("Error getting products from storage:", error);
-      // Fallback a datos iniciales si falla la carga
-      this.saveAll(this.INITIAL_PRODUCTS);
-      return this.INITIAL_PRODUCTS;
-    }
-  }
-
-  static async findById(codigo: string): Promise<Product | null> {
-    const products = await this.getProductsFromStorage();
-    return products.find((p) => p.codigo === codigo) || null;
-  }
-
-  static async create(product: Product): Promise<Product> {
-    const products = await this.getProductsFromStorage();
-    if (this.isCodeDuplicate(products, product.codigo)) {
-      throw new Error('El código del producto ya existe');
-    }
-    products.push(product);
-    this.saveAll(products);
-    return product;
-  }
-
-  static async update(codigo: string, product: Product): Promise<Product> {
-    const products = await this.getProductsFromStorage();
-    const index = products.findIndex((p) => p.codigo === codigo);
-
-    if (index === -1) {
-      throw new Error('Producto no encontrado');
-    }
-
-    // Mantener el ID original si no viene en el objeto actualizado
-    const updatedProduct = { ...products[index], ...product, codigo };
-    products[index] = updatedProduct;
-
-    this.saveAll(products);
-    return updatedProduct;
-  }
-
-  static async updateStock(codigo: string, quantity: number): Promise<void> {
-    const products = await this.getProductsFromStorage();
-    const index = products.findIndex((p) => p.codigo === codigo);
-
-    if (index === -1) {
-      throw new Error(`Producto con código ${codigo} no encontrado`);
-    }
-
-    const product = products[index];
-    if (product.stock < quantity) {
-      throw new Error(`Stock insuficiente para el producto ${product.nombre}`);
-    }
-
-    product.stock -= quantity;
-    products[index] = product;
-    this.saveAll(products);
-  }
-
-  static async delete(codigo: string): Promise<void> {
-    const products = await this.getProductsFromStorage();
-    const filteredProducts = products.filter(p => p.codigo !== codigo);
-
-    if (products.length === filteredProducts.length) {
-      throw new Error('Producto no encontrado para eliminar');
-    }
-
-    this.saveAll(filteredProducts);
   }
 
   private static saveAll(products: Product[]): void {
@@ -261,17 +172,81 @@ export class ProductRepository {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(products));
     } catch (error) {
       console.error('Error saving products to localStorage:', error);
-      throw new Error('Error al guardar los productos');
+    }
+  }
+
+  static async findAll(): Promise<Product[]> {
+    try {
+      // Try backend first
+      const response = await axiosInstance.get('/products');
+      return response.data;
+    } catch (err) {
+      console.warn("Backend unreachable, falling back to local storage for read");
+      const products = await this.getProductsFromStorage();
+      if (products.length === 0) {
+        return this.INITIAL_PRODUCTS;
+      }
+      return products;
+    }
+  }
+
+  static async findById(codigo: string): Promise<Product | null> {
+    const products = await this.findAll();
+    return products.find((p) => p.codigo === codigo) || null;
+  }
+
+  static async create(product: Product): Promise<Product> {
+    try {
+      const response = await axiosInstance.post('/products', product);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating product:", error);
+      throw error;
+    }
+  }
+
+  static async update(codigo: string, product: Product): Promise<Product> {
+    try {
+      // Backend expects ID for update. We assume product has 'id' if it came from backend.
+      // If not, we might fail.
+      const id = (product as any).id;
+      if (!id) {
+        throw new Error("Cannot update product without ID");
+      }
+      const response = await axiosInstance.put(`/products/${id}`, product);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating product:", error);
+      throw error;
+    }
+  }
+
+  static async updateStock(codigo: string, quantity: number): Promise<void> {
+    console.warn("updateStock not implemented in backend yet");
+  }
+
+  static async delete(codigo: string): Promise<void> {
+    try {
+      const products = await this.findAll();
+      const product = products.find(p => p.codigo === codigo);
+      if (product && (product as any).id) {
+        await axiosInstance.delete(`/products/${(product as any).id}`);
+      } else {
+        throw new Error("Product not found or missing ID");
+      }
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      throw error;
     }
   }
 
   static async findByCategory(categoria: string): Promise<Product[]> {
-    const products = await this.getProductsFromStorage();
+    const products = await this.findAll();
     return products.filter(product => product.categoria === categoria);
   }
 
   static async search(query: string): Promise<Product[]> {
-    const products = await this.getProductsFromStorage();
+    const products = await this.findAll();
     const lowerQuery = query.toLowerCase();
     return products.filter(product =>
       product.nombre.toLowerCase().includes(lowerQuery) ||

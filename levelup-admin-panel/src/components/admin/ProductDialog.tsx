@@ -36,8 +36,25 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
 
   useEffect(() => {
     if (product) {
-      setFormData(product);
-      setImagePreview(product.imagen);
+      // Si el producto no tiene código (legacy), usamos su ID
+      const suggestedCode = product.codigo || (product.id ? product.id.toString() : "");
+
+      setFormData({
+        ...product,
+        codigo: suggestedCode,
+        categoria: product.categoria || "",
+        marca: product.marca || "",
+        nombre: product.nombre || "",
+        descripcion: product.descripcion || "",
+        precio: product.precio || 0,
+        stock: product.stock || 0,
+        puntos: product.puntos || 0,
+        imagen: product.imagen || "/placeholder.svg",
+        activo: product.activo !== undefined ? product.activo : true,
+        canjeable: product.canjeable || false,
+        origen: product.origen || "tienda",
+      });
+      setImagePreview(product.imagen || "/placeholder.svg");
     } else {
       setFormData({
         codigo: "",
@@ -92,9 +109,21 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validaciones
-    if (!formData.codigo || !formData.nombre || !formData.marca || !formData.categoria) {
-      toast.error("Por favor completa todos los campos obligatorios");
+    // Validaciones detalladas
+    if (!formData.codigo) {
+      toast.error("El campo 'Código' es obligatorio");
+      return;
+    }
+    if (!formData.nombre) {
+      toast.error("El campo 'Nombre' es obligatorio");
+      return;
+    }
+    if (!formData.marca) {
+      toast.error("El campo 'Marca' es obligatorio");
+      return;
+    }
+    if (!formData.categoria) {
+      toast.error("El campo 'Categoría' es obligatorio");
       return;
     }
 

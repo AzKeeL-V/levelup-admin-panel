@@ -176,7 +176,7 @@ const Index = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8" role="list" aria-label="Productos destacados">
                 {featuredProducts.map((product, index) => (
                   <div
-                    key={product.codigo}
+                    key={product.id || product.codigo || `product-${index}`}
                     className={`animate-fade-in-up animate-geometric-float`}
                     style={{ animationDelay: `${index * 0.2}s` }}
                     role="listitem"

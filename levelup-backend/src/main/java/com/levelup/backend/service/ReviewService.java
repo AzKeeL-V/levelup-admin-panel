@@ -19,6 +19,10 @@ public class ReviewService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
 
+    public List<Review> getAllReviews() {
+        return reviewRepository.findAll();
+    }
+
     public List<Review> getProductReviews(Long productId) {
         return reviewRepository.findByProductId(productId);
     }

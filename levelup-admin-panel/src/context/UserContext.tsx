@@ -61,7 +61,12 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         // which is legacy but useful.
         const storedUser = localStorage.getItem("current_user");
         if (storedUser) {
-          setCurrentUser(JSON.parse(storedUser));
+          const parsedUser = JSON.parse(storedUser);
+          // Ensure role is lowercase for legacy sessions
+          if (parsedUser.rol) {
+            parsedUser.rol = parsedUser.rol.toLowerCase();
+          }
+          setCurrentUser(parsedUser);
         } else {
           // If we have token but no user in local storage, we should fetch it.
           // TODO: Implement fetch current user from API
@@ -127,11 +132,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         // we will construct a minimal user from the response for now.
 
         const minimalUser: User = {
-          id: "0",
+          id: response.id?.toString() || "0",
           nombre: response.nombre,
           correo: response.email,
           contraseña: "",
-          rol: response.role as any,
+          rol: (response.role ? response.role.toLowerCase() : "user") as any,
           activo: true,
           telefono: "",
           rut: "",
@@ -175,7 +180,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       setError(null);
 
       // Call backend register
-      await AuthService.register(user.nombre, user.correo, user.contraseña, user.telefono);
+      await AuthService.register(user.nombre, user.correo, user.contraseña, user.telefono, user.rut, user.referidoPor);
 
       // Reload users to get the new user with ID
       await loadUsers();

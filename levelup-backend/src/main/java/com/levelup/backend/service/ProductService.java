@@ -18,14 +18,14 @@ public class ProductService {
     }
 
     public Product getProductById(Long id) {
-        @SuppressWarnings("null")
+
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
         return product;
     }
 
     public Product createProduct(Product product) {
-        @SuppressWarnings("null")
+
         Product savedProduct = productRepository.save(product);
         return savedProduct;
     }
@@ -33,14 +33,13 @@ public class ProductService {
     public Product updateProduct(Long id, Product productDetails) {
         Product product = getProductById(id);
 
+        product.setCodigo(productDetails.getCodigo());
         product.setNombre(productDetails.getNombre());
         product.setDescripcion(productDetails.getDescripcion());
         product.setPrecio(productDetails.getPrecio());
         product.setStock(productDetails.getStock());
         product.setCategoria(productDetails.getCategoria());
         product.setImagen(productDetails.getImagen());
-        product.setPlataforma(productDetails.getPlataforma());
-        product.setEsDigital(productDetails.getEsDigital());
 
         return productRepository.save(product);
     }

@@ -20,6 +20,9 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true)
+    private String codigo;
+
     @Column(nullable = false)
     private String nombre;
 
@@ -51,9 +54,4 @@ public class Product {
     private Double rating = 0.0;
 
     private String imagen; // Matches frontend 'imagen' field
-
-    private String plataforma; // Optional, kept from before
-
-    @Builder.Default
-    private Boolean esDigital = false; // Kept from before
 }

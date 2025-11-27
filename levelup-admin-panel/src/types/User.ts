@@ -16,7 +16,6 @@ export interface User {
     calle: string;
     numero: string;
     apartamento?: string;
-    edificio?: string;
     ciudad: string;
     comuna?: string;
     region: string;

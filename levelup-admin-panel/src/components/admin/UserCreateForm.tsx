@@ -297,7 +297,8 @@ const UserCreateForm = ({ open, onOpenChange, onUserCreated }: UserCreateFormPro
         direcciones: [{
           calle: formData.calle.trim(),
           numero: formData.numero.trim(),
-          edificio: formData.apartamento.trim() || undefined,
+          apartamento: formData.apartamento.trim() || undefined,
+          ciudad: formData.ciudad || "",
           comuna: formData.comuna.trim(),
           region: formData.region,
           codigoPostal: formData.codigoPostal,
@@ -307,6 +308,7 @@ const UserCreateForm = ({ open, onOpenChange, onUserCreated }: UserCreateFormPro
           email: true,
           sms: false
         },
+        newsletter: formData.newsletter,
         intereses: formData.intereses,
         aceptaTerminos: formData.aceptaTerminos,
         aceptaPoliticaPrivacidad: formData.aceptaPoliticaPrivacidad,

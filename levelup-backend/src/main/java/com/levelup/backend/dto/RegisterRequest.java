@@ -15,4 +15,5 @@ public class RegisterRequest {
     private String password;
     private String telefono;
     private String rut;
+    private String codigoReferido;
 }

@@ -302,8 +302,8 @@ const Productos = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredProducts.map((product) => (
-                <TableRow key={product.codigo} className="hover:bg-secondary/30">
+              {filteredProducts.map((product, index) => (
+                <TableRow key={product.id || product.codigo || `prod-${index}`} className="hover:bg-secondary/30">
                   <TableCell>
                     <div className="flex items-center gap-4">
                       <img
@@ -411,8 +411,8 @@ const Productos = () => {
                 {filteredProducts.slice(
                   (mobilePage - 1) * MOBILE_ITEMS_PER_PAGE,
                   mobilePage * MOBILE_ITEMS_PER_PAGE
-                ).map((product) => (
-                  <Card key={product.codigo} className="p-4 transition-all hover:shadow-md">
+                ).map((product, index) => (
+                  <Card key={product.id || product.codigo || `prod-mobile-${index}`} className="p-4 transition-all hover:shadow-md">
                     <div className="space-y-3">
                       {/* Header with name and actions */}
                       <div className="flex items-start justify-between gap-3">

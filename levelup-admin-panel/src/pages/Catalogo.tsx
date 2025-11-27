@@ -350,8 +350,8 @@ const Catalogo = () => {
                 ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8"
                 : "space-y-4 mb-8"
             }>
-              {currentProducts.map((product) => (
-                <div key={product.codigo} className="animate-fade-in">
+              {currentProducts.map((product, index) => (
+                <div key={product.id || product.codigo || `prod-${index}`} className="animate-fade-in">
                   {viewMode === "grid" ? (
                     <ProductCard
                       product={product}

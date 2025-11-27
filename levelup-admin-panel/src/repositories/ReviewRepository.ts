@@ -33,13 +33,15 @@ export class ReviewRepository {
       }
 
       // 3. Merge inteligente
-      const mergedReviews = [...localReviews];
-      jsonReviews.forEach(jsonReview => {
-        const exists = localReviews.some(r => r.id === jsonReview.id);
-        if (!exists) {
-          mergedReviews.push(jsonReview);
-        }
-      });
+      const mergedReviews = Array.isArray(localReviews) ? [...localReviews] : [];
+      if (Array.isArray(jsonReviews)) {
+        jsonReviews.forEach(jsonReview => {
+          const exists = mergedReviews.some(r => r.id === jsonReview.id);
+          if (!exists) {
+            mergedReviews.push(jsonReview);
+          }
+        });
+      }
 
       // 4. Guardar si hay cambios (o siempre para asegurar sincronización inicial)
       if (mergedReviews.length > 0) {

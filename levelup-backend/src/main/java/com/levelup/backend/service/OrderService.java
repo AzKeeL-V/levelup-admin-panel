@@ -51,7 +51,7 @@ public class OrderService {
         BigDecimal subtotal = BigDecimal.ZERO;
 
         for (Map.Entry<Long, Integer> entry : items.entrySet()) {
-            @SuppressWarnings("null")
+
             Product product = productRepository.findById(entry.getKey())
                     .orElseThrow(() -> new RuntimeException("Producto no encontrado: " + entry.getKey()));
 

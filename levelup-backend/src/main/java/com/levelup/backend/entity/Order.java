@@ -63,8 +63,7 @@ public class Order {
             @AttributeOverride(name = "comuna", column = @Column(name = "envio_comuna")),
             @AttributeOverride(name = "region", column = @Column(name = "envio_region")),
             @AttributeOverride(name = "codigoPostal", column = @Column(name = "envio_codigo_postal")),
-            @AttributeOverride(name = "pais", column = @Column(name = "envio_pais")),
-            @AttributeOverride(name = "telefono", column = @Column(name = "envio_telefono"))
+            @AttributeOverride(name = "pais", column = @Column(name = "envio_pais"))
     })
     private Address direccionEnvio;
 

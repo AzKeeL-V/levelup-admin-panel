@@ -2,10 +2,12 @@ import api from "./api";
 import { User } from "@/types/User";
 
 export interface AuthResponse {
+    id: number;
     token: string;
     email: string;
     nombre: string;
     role: string;
+    activo: boolean;
 }
 
 export class AuthService {
@@ -19,8 +21,8 @@ export class AuthService {
         return response.data;
     }
 
-    static async register(nombre: string, email: string, password: string, telefono?: string): Promise<AuthResponse> {
-        const response = await api.post<AuthResponse>("/auth/register", { nombre, email, password, telefono });
+    static async register(nombre: string, email: string, password: string, telefono?: string, rut?: string, codigoReferido?: string): Promise<AuthResponse> {
+        const response = await api.post<AuthResponse>("/auth/register", { nombre, email, password, telefono, rut, codigoReferido });
         if (response.data.token) {
             this.setToken(response.data.token);
         }
