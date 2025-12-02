@@ -34,6 +34,12 @@ const Carrito = () => {
     }).format(price);
   };
 
+  // Shipping Logic
+  const SHIPPING_COST = 3990;
+  const FREE_SHIPPING_THRESHOLD = 50000;
+  const shippingCost = cart.subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
+  const total = cart.subtotal + shippingCost;
+
   const handleQuantityChange = (itemId: string, newQuantity: number) => {
     if (newQuantity < 1) return;
 
@@ -264,8 +270,8 @@ const Carrito = () => {
 
                   <div className="flex justify-between text-slate-300 text-xs sm:text-sm lg:text-base">
                     <span>Envío</span>
-                    <span className={cart.shipping === 0 ? "text-green-400 font-medium" : "text-yellow-400 font-medium"}>
-                      {cart.shipping === 0 ? "Gratis" : formatPrice(cart.shipping)}
+                    <span className={shippingCost === 0 ? "text-green-400 font-medium" : "text-white font-medium"}>
+                      {shippingCost === 0 ? "Gratis" : formatPrice(shippingCost)}
                     </span>
                   </div>
 
@@ -273,17 +279,15 @@ const Carrito = () => {
 
                   <div className="flex justify-between text-white font-bold text-base sm:text-lg lg:text-xl">
                     <span>Total</span>
-                    <span>{formatPrice(cart.total)}</span>
+                    <span>{formatPrice(total)}</span>
                   </div>
 
                   {/* Points earned */}
-                  {cart.items.some(item => item.puntosGanados) && (
-                    <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-2 sm:p-3">
-                      <p className="text-yellow-400 text-xs sm:text-sm">
-                        🎉 Ganarás {cart.items.reduce((sum, item) => sum + (item.puntosGanados || 0) * item.quantity, 0)} puntos con esta compra
-                      </p>
-                    </div>
-                  )}
+                  <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-2 sm:p-3">
+                    <p className="text-yellow-400 text-xs sm:text-sm">
+                      🎉 Ganarás {Math.round(total * 0.05)} puntos con esta compra
+                    </p>
+                  </div>
                 </div>
                 <Button
                   onClick={handleCheckout}

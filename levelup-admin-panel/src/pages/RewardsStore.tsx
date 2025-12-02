@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useUsers } from "@/context/UserContext";
+import { toast } from "sonner";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -62,13 +63,13 @@ const RewardsStore = () => {
 
   const handleRedeemProduct = (product: Product) => {
     if (!currentUser.id) {
-      alert("Debes iniciar sesión para canjear productos");
+      toast.warning("Debes iniciar sesión para canjear productos");
       return;
     }
 
     const requiredPoints = product.puntos || 0;
     if (userPoints < requiredPoints) {
-      alert(`No tienes suficientes puntos. Necesitas ${requiredPoints} puntos, tienes ${userPoints}.`);
+      toast.warning(`No tienes suficientes puntos. Necesitas ${requiredPoints} puntos, tienes ${userPoints}.`);
       return;
     }
 

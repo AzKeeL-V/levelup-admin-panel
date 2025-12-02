@@ -93,7 +93,7 @@ const Perfil = () => {
       setTimeout(() => setCopiedReferral(false), 2000);
     } catch (error) {
       console.error("Error copying referral code:", error);
-      alert("Error al copiar el código de referido");
+      toast.error("Error al copiar el código de referido");
     }
   };
 
@@ -115,7 +115,7 @@ const Perfil = () => {
     const updatedUser = { ...currentUser, direcciones: updatedAddresses };
     await handleUserUpdate(updatedUser);
     setEditingAddress(null);
-    alert("Dirección actualizada exitosamente");
+    toast.success("Dirección actualizada exitosamente");
   };
 
   const handleCancelAddressEdit = () => {
@@ -125,19 +125,29 @@ const Perfil = () => {
   const handleDeleteAddress = async (index: number) => {
     if (!currentUser) return;
 
-    const confirmDelete = window.confirm("¿Estás seguro de que quieres eliminar esta dirección? Esta acción no se puede deshacer.");
-    if (!confirmDelete) return;
+    // Use toast with confirmation action instead of window.confirm
+    toast("¿Estás seguro de que quieres eliminar esta dirección?", {
+      description: "Esta acción no se puede deshacer.",
+      action: {
+        label: "Eliminar",
+        onClick: async () => {
+          const updatedAddresses = currentUser.direcciones.filter((_, i) => i !== index);
+          const updatedUser = { ...currentUser, direcciones: updatedAddresses };
 
-    const updatedAddresses = currentUser.direcciones.filter((_, i) => i !== index);
-    const updatedUser = { ...currentUser, direcciones: updatedAddresses };
-
-    try {
-      await handleUserUpdate(updatedUser);
-      alert("Dirección eliminada exitosamente");
-    } catch (error) {
-      console.error("Error deleting address:", error);
-      alert("Error al eliminar la dirección");
-    }
+          try {
+            await handleUserUpdate(updatedUser);
+            toast.success("Dirección eliminada exitosamente");
+          } catch (error) {
+            console.error("Error deleting address:", error);
+            toast.error("Error al eliminar la dirección");
+          }
+        }
+      },
+      cancel: {
+        label: "Cancelar",
+        onClick: () => { }
+      }
+    });
   };
 
   if (isLoading) {

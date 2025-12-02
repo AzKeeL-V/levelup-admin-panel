@@ -18,12 +18,12 @@ public class EventService {
     }
 
     public Event getEventById(Long id) {
-        return eventRepository.findById(id)
+        return eventRepository.findById(java.util.Objects.requireNonNull(id))
                 .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
     }
 
     public Event createEvent(Event event) {
-        return eventRepository.save(event);
+        return eventRepository.save(java.util.Objects.requireNonNull(event));
     }
 
     public Event updateEvent(Long id, Event eventDetails) {
@@ -38,6 +38,6 @@ public class EventService {
     }
 
     public void deleteEvent(Long id) {
-        eventRepository.deleteById(id);
+        eventRepository.deleteById(java.util.Objects.requireNonNull(id));
     }
 }

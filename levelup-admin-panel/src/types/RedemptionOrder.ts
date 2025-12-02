@@ -12,7 +12,6 @@ export interface RedemptionOrder {
     departamento?: string;
     ciudad: string;
     region: string;
-    codigoPostal: string;
   };
   metodoRetiro: "retiro" | "envio"; // retiro = gratis, envio = puede cobrar
   estado: "pendiente" | "confirmado" | "enviado" | "entregado" | "cancelado";

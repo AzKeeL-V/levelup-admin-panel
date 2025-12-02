@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// Trigger re-scan
+
 @RestController
 @RequestMapping("/api/blogs")
 @RequiredArgsConstructor

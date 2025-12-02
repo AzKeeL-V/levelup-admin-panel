@@ -125,7 +125,7 @@ export class ProductRepository {
       codigo: "PP001",
       categoria: "Poleras Personalizadas",
       marca: "Level-Up",
-      nombre: "Polera Gamer Personalizada '''Level-Up'''",
+      nombre: "Polera Gamer Personalizada 'Level-Up'",
       descripcion: "Una camiseta cómoda y estilizada, con la posibilidad de personalizarla con tu gamer tag o diseño favorito.",
       precio: 14990,
       stock: 67,
@@ -213,6 +213,7 @@ export class ProductRepository {
       if (!id) {
         throw new Error("Cannot update product without ID");
       }
+      console.log("[ProductRepository] Updating product:", id, product);
       const response = await axiosInstance.put(`/products/${id}`, product);
       return response.data;
     } catch (error) {

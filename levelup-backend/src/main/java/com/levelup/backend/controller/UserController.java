@@ -26,8 +26,14 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
+    @PostMapping
+    public ResponseEntity<User> createUser(@RequestBody User user) {
+        return ResponseEntity.ok(userService.createUser(user));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
+        System.out.println("UserController: updateUser called for ID: " + id);
         return ResponseEntity.ok(userService.updateUser(id, user));
     }
 

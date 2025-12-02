@@ -5,6 +5,8 @@ import com.levelup.backend.dto.LoginRequest;
 import com.levelup.backend.dto.RegisterRequest;
 import com.levelup.backend.entity.Role;
 import com.levelup.backend.entity.User;
+import com.levelup.backend.entity.Address;
+import java.util.List;
 import com.levelup.backend.repository.UserRepository;
 import com.levelup.backend.utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +28,10 @@ public class AuthService {
         private final AuthenticationManager authenticationManager;
 
         private static final int PUNTOS_BIENVENIDA_REFERIDO = 100; // Puntos para el nuevo usuario
+
         private static final int PUNTOS_POR_REFERIR = 150; // Puntos para quien refiere
+        private static final java.util.List<String> DUOC_DOMAINS = java.util.List.of("duocuc.cl", "duoc.cl",
+                        "profesor.duoc.cl");
 
         public AuthResponse register(RegisterRequest request) {
                 if (userRepository.existsByEmail(request.getEmail())) {
@@ -69,13 +74,24 @@ public class AuthService {
                                 .telefono(request.getTelefono())
                                 .rut(request.getRut())
                                 .role(Role.USER)
-                                .tipo("normal")
+                                .tipo(isDuocEmail(request.getEmail()) ? "duoc" : "normal")
                                 .puntos(puntosIniciales)
                                 .nivel("bronce")
                                 .codigoReferido(codigoReferido)
+                                .referidoPor(request.getReferidoPor())
+                                .aceptaTerminos(true)
+                                .aceptaPoliticaPrivacidad(true)
+                                .direcciones(request.getCalle() != null ? List.of(Address.builder()
+                                                .calle(request.getCalle())
+                                                .numero(request.getNumero())
+                                                .ciudad(request.getCiudad())
+                                                .region(request.getRegion())
+
+                                                .nombre("Casa") // Default name
+                                                .build()) : null)
                                 .build();
 
-                var savedUser = userRepository.save(user);
+                var savedUser = userRepository.save(java.util.Objects.requireNonNull(user));
                 var jwtToken = jwtUtils.generateToken(savedUser);
 
                 System.out.println("Usuario registrado: " + savedUser.getNombre() + " con código: " + codigoReferido
@@ -97,6 +113,13 @@ public class AuthService {
                 var jwtToken = jwtUtils.generateToken(user);
 
                 return buildAuthResponse(user, jwtToken);
+        }
+
+        private boolean isDuocEmail(String email) {
+                if (email == null)
+                        return false;
+                String lowerEmail = email.toLowerCase();
+                return DUOC_DOMAINS.stream().anyMatch(domain -> lowerEmail.endsWith("@" + domain));
         }
 
         public User getCurrentUser(String email) {

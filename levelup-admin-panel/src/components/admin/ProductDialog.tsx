@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Product } from "@/types/Product";
 import { Upload, X } from "lucide-react";
 import { toast } from "sonner";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+
 
 interface ProductDialogProps {
   open: boolean;
@@ -29,10 +29,10 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
     imagen: "/placeholder.svg",
     activo: true,
     canjeable: false,
-    origen: "tienda",
   });
 
   const [imagePreview, setImagePreview] = useState<string>("/placeholder.svg");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   useEffect(() => {
     if (product) {
@@ -52,7 +52,6 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
         imagen: product.imagen || "/placeholder.svg",
         activo: product.activo !== undefined ? product.activo : true,
         canjeable: product.canjeable || false,
-        origen: product.origen || "tienda",
       });
       setImagePreview(product.imagen || "/placeholder.svg");
     } else {
@@ -68,41 +67,65 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
         imagen: "/placeholder.svg",
         activo: true,
         canjeable: false,
-        origen: "tienda",
       });
       setImagePreview("/placeholder.svg");
     }
   }, [product, open]);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      // Validar tipo de archivo
-      if (!file.type.startsWith('image/')) {
-        toast.error("Por favor selecciona un archivo de imagen válido");
-        return;
+    if (!file) return;
+
+    // Validar tipo de archivo
+    if (!file.type.startsWith('image/')) {
+      toast.error("Por favor selecciona un archivo de imagen válido");
+      return;
+    }
+
+    // Validar tamaño (máx 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("La imagen no puede superar los 5MB");
+      return;
+    }
+
+    console.log("[ProductDialog] Uploading image:", file.name);
+    setIsUploadingImage(true);
+
+    try {
+      // Crear FormData para enviar el archivo
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', file);
+
+      // Subir imagen al backend
+      const response = await fetch('http://localhost:8080/api/upload/product-image', {
+        method: 'POST',
+        body: uploadFormData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error al subir la imagen');
       }
 
-      // Validar tamaño (máx 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("La imagen no puede superar los 5MB");
-        return;
-      }
+      const data = await response.json();
+      console.log("[ProductDialog] Upload successful:", data);
 
-      // Crear URL de preview
+      // Crear preview local
       const reader = new FileReader();
       reader.onloadend = () => {
-        const result = reader.result as string;
-        setImagePreview(result);
-
-        // En producción, aquí subirías la imagen a un servidor
-        // Por ahora, guardamos una ruta simulada
-        const imagePath = `/images/products/${file.name}`;
-        setFormData({ ...formData, imagen: imagePath });
-
-        toast.success("Imagen cargada (en producción se subiría al servidor)");
+        setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
+
+      // Guardar la URL retornada por el backend
+      setFormData(prev => ({ ...prev, imagen: data.url }));
+
+      toast.success("Imagen subida exitosamente");
+    } catch (error) {
+      console.error("[ProductDialog] Upload error:", error);
+      toast.error(error instanceof Error ? error.message : "Error al subir la imagen");
+    } finally {
+      setIsUploadingImage(false);
     }
   };
 
@@ -180,9 +203,10 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
                     variant="outline"
                     className="border-border"
                     onClick={() => document.getElementById('image-upload')?.click()}
+                    disabled={isUploadingImage}
                   >
                     <Upload className="w-4 h-4 mr-2" />
-                    Subir Imagen
+                    {isUploadingImage ? "Subiendo..." : "Subir Imagen"}
                   </Button>
                   {imagePreview !== "/placeholder.svg" && (
                     <Button
@@ -341,33 +365,7 @@ export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDi
             </p>
           </div>
 
-          {/* Origen del Producto */}
-          <div className="space-y-3">
-            <Label className="text-sm font-medium">Origen del Producto</Label>
-            <RadioGroup
-              value={formData.origen || "tienda"}
-              onValueChange={(value) =>
-                setFormData({ ...formData, origen: value as "tienda" | "recompensas" })
-              }
-              className="flex gap-4"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="tienda" id="tienda" />
-                <Label htmlFor="tienda" className="text-sm font-normal cursor-pointer">
-                  Tienda Regular (compra con dinero)
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="recompensas" id="recompensas" />
-                <Label htmlFor="recompensas" className="text-sm font-normal cursor-pointer">
-                  Tienda de Recompensas (canje por puntos)
-                </Label>
-              </div>
-            </RadioGroup>
-            <p className="text-xs text-muted-foreground">
-              Esto permite que el carrito identifique si el producto se compra con dinero o se canjea por puntos.
-            </p>
-          </div>
+
           <DialogFooter>
             <Button
               type="button"

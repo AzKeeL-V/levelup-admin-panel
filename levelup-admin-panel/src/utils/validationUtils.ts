@@ -232,3 +232,33 @@ export const formatChileanPhone = (value: string): string => {
   const digits = cleanValue.slice(0, 8);
   return "+569" + digits;
 };
+
+/**
+ * Masks a card number to show only the last 4 digits
+ * This is required for PCI-DSS compliance - never store full card numbers
+ * @param cardNumber - Full card number or already masked number
+ * @returns Masked card number in format "**** **** **** 1234"
+ */
+export const maskCardNumber = (cardNumber: string): string => {
+  if (!cardNumber) return "";
+
+  // Remove spaces and dashes
+  const cleanNumber = cardNumber.replace(/[\s-]/g, "");
+
+  // If already masked, return as is
+  if (cleanNumber.includes("*")) {
+    return cardNumber;
+  }
+
+  // Validate minimum length
+  if (cleanNumber.length < 4) {
+    return "**** **** **** ****";
+  }
+
+  // Get last 4 digits
+  const lastFour = cleanNumber.substring(cleanNumber.length - 4);
+
+  // Return masked format
+  return `**** **** **** ${lastFour}`;
+};
+

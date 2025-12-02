@@ -16,6 +16,7 @@ import Footer from "@/components/Footer"; // Also likely missing
 import RedemptionReceipt from "../components/RedemptionReceipt"; // Also likely missing
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"; // Also likely missing
 import { Alert, AlertDescription } from "@/components/ui/alert"; // Also likely missing
+import { toast } from "sonner";
 
 const RedemptionCheckout = () => {
   const { productId } = useParams<{ productId: string }>();
@@ -30,7 +31,6 @@ const RedemptionCheckout = () => {
     departamento: "",
     ciudad: "",
     region: "",
-    codigoPostal: "",
   });
   const [showReceipt, setShowReceipt] = useState(false);
   const [receipt, setReceipt] = useState<ReceiptType | null>(null);
@@ -60,12 +60,12 @@ const RedemptionCheckout = () => {
 
   const handleSubmitRedemption = async () => {
     if (!hasEnoughPoints) {
-      alert("No tienes suficientes puntos");
+      toast.warning("No tienes suficientes puntos");
       return;
     }
 
     if (!selectedDireccion && (!customDireccion.calle || !customDireccion.ciudad)) {
-      alert("Debes ingresar una dirección de envío");
+      toast.warning("Debes ingresar una dirección de envío");
       return;
     }
 
@@ -137,7 +137,7 @@ const RedemptionCheckout = () => {
       setShowReceipt(true);
     } catch (error) {
       console.error("Error processing redemption:", error);
-      alert("Error al procesar el canje. Intenta nuevamente.");
+      toast.error("Error al procesar el canje. Intenta nuevamente.");
     } finally {
       setLoading(false);
     }
@@ -346,29 +346,10 @@ const RedemptionCheckout = () => {
                         className="bg-slate-700 border-slate-600 text-white"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="codigoPostal" className="text-xs text-slate-400">
-                        Código Postal
-                      </Label>
-                      <Input
-                        id="codigoPostal"
-                        placeholder="Ej: 8320000"
-                        value={customDireccion.codigoPostal}
-                        onChange={(e) =>
-                          setCustomDireccion({
-                            ...customDireccion,
-                            codigoPostal: e.target.value,
-                          })
-                        }
-                        className="bg-slate-700 border-slate-600 text-white"
-                      />
-                    </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
-
-            {/* Método de Retiro */}
             <Card className="bg-slate-800/50 border-slate-700">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">

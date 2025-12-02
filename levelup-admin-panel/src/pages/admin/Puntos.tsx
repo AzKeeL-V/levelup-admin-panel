@@ -14,6 +14,13 @@ interface ReferralSettings {
   minReferralLevel: "bronce" | "plata" | "oro" | "diamante";
 }
 
+interface LevelThresholds {
+  bronce: { min: number; max: number };
+  plata: { min: number; max: number };
+  oro: { min: number; max: number };
+  diamante: { min: number; max: number };
+}
+
 const Puntos = () => {
   const { users, loading, updateUser } = useUsers();
   const [editingPoints, setEditingPoints] = useState<{ [userId: string]: number }>({});
@@ -23,6 +30,13 @@ const Puntos = () => {
     minReferralLevel: "bronce"
   });
   const [showSettings, setShowSettings] = useState(false);
+  const [levelThresholds, setLevelThresholds] = useState<LevelThresholds>({
+    bronce: { min: 0, max: 499 },
+    plata: { min: 500, max: 999 },
+    oro: { min: 1000, max: 1999 },
+    diamante: { min: 2000, max: 999999 }
+  });
+  const [showLevelSettings, setShowLevelSettings] = useState(false);
 
   // Excluir administradores del listado y de estadísticas
   const nonAdminUsers = users.filter(u => u.rol !== 'admin');
@@ -64,6 +78,29 @@ const Puntos = () => {
     }
   };
 
+  // Función para recalcular niveles de todos los usuarios según los nuevos rangos
+  const recalculateAllLevels = async () => {
+    try {
+      console.log("Recalculando niveles de todos los usuarios...");
+      for (const user of nonAdminUsers) {
+        const newLevel = getLevelFromPoints(user.puntos);
+        if (newLevel !== user.nivel) {
+          console.log(`Actualizando nivel de ${user.nombre}: ${user.nivel} -> ${newLevel}`);
+          await updateUser(user.id, { nivel: newLevel });
+        }
+      }
+      console.log("Niveles recalculados exitosamente");
+    } catch (error) {
+      console.error("Error recalculando niveles:", error);
+    }
+  };
+
+  // Función para guardar los cambios de rangos de niveles
+  const saveLevelThresholds = async () => {
+    await recalculateAllLevels();
+    setShowLevelSettings(false);
+  };
+
   // Función para iniciar edición de puntos
   const startEditing = (userId: string, currentPoints: number) => {
     setEditingPoints(prev => ({
@@ -83,11 +120,11 @@ const Puntos = () => {
 
 
 
-  // Función para determinar nivel basado en puntos
+  // Función para determinar nivel basado en puntos (ahora usa thresholds configurables)
   const getLevelFromPoints = (points: number): "bronce" | "plata" | "oro" | "diamante" => {
-    if (points >= 2000) return "diamante";
-    if (points >= 1000) return "oro";
-    if (points >= 500) return "plata";
+    if (points >= levelThresholds.diamante.min) return "diamante";
+    if (points >= levelThresholds.oro.min) return "oro";
+    if (points >= levelThresholds.plata.min) return "plata";
     return "bronce";
   };
 
@@ -280,9 +317,9 @@ const Puntos = () => {
                 <div className="text-center">
                   <Badge variant={
                     user.nivel === "diamante" ? "default" :
-                    user.nivel === "oro" ? "secondary" :
-                    user.nivel === "plata" ? "outline" :
-                    "destructive"
+                      user.nivel === "oro" ? "secondary" :
+                        user.nivel === "plata" ? "outline" :
+                          "destructive"
                   }>
                     {user.nivel.toUpperCase()}
                   </Badge>
@@ -346,25 +383,128 @@ const Puntos = () => {
 
 
 
-      {/* Información sobre niveles */}
+      {/* Configuración de Niveles */}
       <Card className="p-6 bg-card border-border">
-        <h3 className="text-lg font-bold mb-4">Sistema de Niveles</h3>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <Award className="w-5 h-5 text-primary" />
+            <h2 className="text-xl font-bold">Configuración de Niveles</h2>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowLevelSettings(!showLevelSettings)}
+          >
+            {showLevelSettings ? "Ocultar" : "Editar"} Rangos
+          </Button>
+        </div>
+
+        {showLevelSettings && (
+          <div className="mb-6 p-4 bg-secondary/30 rounded-lg border border-border">
+            <p className="text-sm text-muted-foreground mb-4">
+              Configura los rangos de puntos para cada nivel. Los cambios se aplicarán automáticamente cuando los usuarios ganen o pierdan puntos.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="plata-min">Plata - Puntos Mínimos</Label>
+                <Input
+                  id="plata-min"
+                  type="number"
+                  value={levelThresholds.plata.min}
+                  onChange={(e) => {
+                    const newMin = parseInt(e.target.value) || 0;
+                    setLevelThresholds(prev => ({
+                      ...prev,
+                      bronce: { ...prev.bronce, max: newMin - 1 },
+                      plata: { ...prev.plata, min: newMin }
+                    }));
+                  }}
+                  min="1"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="oro-min">Oro - Puntos Mínimos</Label>
+                <Input
+                  id="oro-min"
+                  type="number"
+                  value={levelThresholds.oro.min}
+                  onChange={(e) => {
+                    const newMin = parseInt(e.target.value) || 0;
+                    setLevelThresholds(prev => ({
+                      ...prev,
+                      plata: { ...prev.plata, max: newMin - 1 },
+                      oro: { ...prev.oro, min: newMin }
+                    }));
+                  }}
+                  min={levelThresholds.plata.min + 1}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="diamante-min">Diamante - Puntos Mínimos</Label>
+                <Input
+                  id="diamante-min"
+                  type="number"
+                  value={levelThresholds.diamante.min}
+                  onChange={(e) => {
+                    const newMin = parseInt(e.target.value) || 0;
+                    setLevelThresholds(prev => ({
+                      ...prev,
+                      oro: { ...prev.oro, max: newMin - 1 },
+                      diamante: { ...prev.diamante, min: newMin }
+                    }));
+                  }}
+                  min={levelThresholds.oro.min + 1}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button
+                variant="outline"
+                onClick={() => setShowLevelSettings(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={saveLevelThresholds}
+                className="bg-primary"
+              >
+                Guardar Cambios y Recalcular Niveles
+              </Button>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="text-center p-4 bg-secondary/30 rounded-lg">
+          <div className="text-center p-4 bg-secondary/30 rounded-lg border border-amber-900/50">
             <Badge variant="destructive" className="mb-2">BRONCE</Badge>
-            <p className="text-sm">0 - 499 puntos</p>
+            <p className="text-sm font-semibold">{levelThresholds.bronce.min} - {levelThresholds.bronce.max} puntos</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {nonAdminUsers.filter(u => u.nivel === "bronce").length} usuarios
+            </p>
           </div>
-          <div className="text-center p-4 bg-secondary/30 rounded-lg">
+          <div className="text-center p-4 bg-secondary/30 rounded-lg border border-slate-400/50">
             <Badge variant="outline" className="mb-2">PLATA</Badge>
-            <p className="text-sm">500 - 999 puntos</p>
+            <p className="text-sm font-semibold">{levelThresholds.plata.min} - {levelThresholds.plata.max} puntos</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {nonAdminUsers.filter(u => u.nivel === "plata").length} usuarios
+            </p>
           </div>
-          <div className="text-center p-4 bg-secondary/30 rounded-lg">
+          <div className="text-center p-4 bg-secondary/30 rounded-lg border border-yellow-500/50">
             <Badge variant="secondary" className="mb-2">ORO</Badge>
-            <p className="text-sm">1000 - 1999 puntos</p>
+            <p className="text-sm font-semibold">{levelThresholds.oro.min} - {levelThresholds.oro.max} puntos</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {nonAdminUsers.filter(u => u.nivel === "oro").length} usuarios
+            </p>
           </div>
-          <div className="text-center p-4 bg-secondary/30 rounded-lg">
+          <div className="text-center p-4 bg-secondary/30 rounded-lg border border-blue-500/50">
             <Badge variant="default" className="mb-2">DIAMANTE</Badge>
-            <p className="text-sm">2000+ puntos</p>
+            <p className="text-sm font-semibold">{levelThresholds.diamante.min}+ puntos</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {nonAdminUsers.filter(u => u.nivel === "diamante").length} usuarios
+            </p>
           </div>
         </div>
       </Card>

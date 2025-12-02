@@ -21,8 +21,8 @@ export class AuthService {
         return response.data;
     }
 
-    static async register(nombre: string, email: string, password: string, telefono?: string, rut?: string, codigoReferido?: string): Promise<AuthResponse> {
-        const response = await api.post<AuthResponse>("/auth/register", { nombre, email, password, telefono, rut, codigoReferido });
+    static async register(nombre: string, email: string, password: string, telefono?: string, rut?: string, codigoReferido?: string, calle?: string, numero?: string, ciudad?: string, region?: string): Promise<AuthResponse> {
+        const response = await api.post<AuthResponse>("/auth/register", { nombre, email, password, telefono, rut, codigoReferido, calle, numero, ciudad, region });
         if (response.data.token) {
             this.setToken(response.data.token);
         }

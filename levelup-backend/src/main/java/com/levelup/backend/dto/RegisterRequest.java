@@ -16,4 +16,11 @@ public class RegisterRequest {
     private String telefono;
     private String rut;
     private String codigoReferido;
+    private String referidoPor;
+
+    // Address fields
+    private String calle;
+    private String numero;
+    private String ciudad;
+    private String region;
 }

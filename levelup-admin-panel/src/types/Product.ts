@@ -11,7 +11,6 @@ export interface Product {
   imagen: string;
   activo: boolean;
   canjeable: boolean;
-  origen?: "tienda" | "recompensas"; // "tienda" = tienda regular, "recompensas" = canje por puntos
   rating?: number;
   fechaCreacion?: string;
   fechaActualizacion?: string;

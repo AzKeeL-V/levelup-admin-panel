@@ -20,6 +20,7 @@ import { Order } from "@/types/Order";
 
 const Pedidos = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("todos");
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
@@ -117,56 +118,56 @@ const Pedidos = () => {
         <div className="block md:hidden">
           {displayOrders.length > 0 ? (
             <>
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {paginatedMobileUsers.map((order) => (
-                  <Card key={order.id} className="p-4 transition-all hover:shadow-md">
-                    <div className="space-y-4">
+                  <Card key={order.id} className="p-3 transition-all hover:shadow-md sm:p-4">
+                    <div className="space-y-3 sm:space-y-4">
                       {/* Header with order number and actions */}
-                      <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start justify-between gap-2 sm:gap-3">
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-sm leading-tight">{order.numeroOrden}</h3>
-                          <p className="mt-1 text-xs text-muted-foreground truncate">{order.userName}</p>
-                          <p className="text-xs text-muted-foreground truncate">{order.userEmail}</p>
+                          <h3 className="font-semibold text-xs leading-tight sm:text-sm">{order.numeroOrden}</h3>
+                          <p className="mt-1 text-[10px] text-muted-foreground truncate sm:text-xs">{order.userName}</p>
+                          <p className="text-[10px] text-muted-foreground truncate sm:text-xs">{order.userEmail}</p>
                         </div>
                         <div className="flex gap-1 flex-shrink-0">
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => handleViewOrderDetails(order)}
-                            className="h-8 w-8 p-0"
+                            className="h-7 w-7 p-0 sm:h-8 sm:w-8"
                           >
-                            <Eye className="h-3.5 w-3.5" />
+                            <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                           </Button>
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => handleEditOrder(order)}
-                            className="h-8 w-8 p-0"
+                            className="h-7 w-7 p-0 sm:h-8 sm:w-8"
                           >
-                            <Edit className="h-3.5 w-3.5" />
+                            <Edit className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                           </Button>
                         </div>
                       </div>
                       {/* Order details */}
-                      <div className="space-y-2">
+                      <div className="space-y-1.5 sm:space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs text-muted-foreground">Fecha:</span>
-                          <span className="text-xs">{new Date(order.fechaCreacion).toLocaleDateString("es-CL")}</span>
+                          <span className="text-[10px] text-muted-foreground sm:text-xs">Fecha:</span>
+                          <span className="text-[10px] sm:text-xs">{new Date(order.fechaCreacion).toLocaleDateString("es-CL")}</span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-xs text-muted-foreground">Estado:</span>
-                          <Badge className={`text-xs ${getEstadoColor(order.estado)}`}>
+                          <span className="text-[10px] text-muted-foreground sm:text-xs">Estado:</span>
+                          <Badge className={`text-[10px] sm:text-xs ${getEstadoColor(order.estado)}`}>
                             {getEstadoIcon(order.estado)}
                             <span className="ml-1 capitalize">{order.estado}</span>
                           </Badge>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-xs text-muted-foreground">Total:</span>
-                          <span className="text-sm font-semibold text-primary">${order.total.toLocaleString("es-CL")}</span>
+                          <span className="text-[10px] text-muted-foreground sm:text-xs">Total:</span>
+                          <span className="text-xs font-semibold text-primary sm:text-sm">${(order.total || 0).toLocaleString("es-CL")}</span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-xs text-muted-foreground">Puntos:</span>
-                          <div className="text-xs">
+                          <span className="text-[10px] text-muted-foreground sm:text-xs">Puntos:</span>
+                          <div className="text-[10px] sm:text-xs">
                             <p className="text-green-600">+{order.puntosGanados}</p>
                             {order.puntosUsados > 0 && (
                               <p className="text-red-600">-{order.puntosUsados}</p>
@@ -211,86 +212,92 @@ const Pedidos = () => {
         </div>
 
         {/* Desktop Table View */}
-        <div className="hidden md:block">
-          <div className="w-full">
-            <Table className="w-full">
-              <TableHeader>
-                <TableRow className="bg-muted/50 hover:bg-muted/50">
-                  <TableHead className="h-12 px-3 text-xs font-medium w-[180px]">N° Orden</TableHead>
-                  <TableHead className="h-12 px-3 text-xs font-medium w-[220px]">Cliente</TableHead>
-                  <TableHead className="h-12 px-3 text-xs font-medium w-[120px]">Fecha</TableHead>
-                  <TableHead className="h-12 px-3 text-xs font-medium w-[100px]">Estado</TableHead>
-                  <TableHead className="h-12 px-3 text-xs font-medium w-[120px]">Total</TableHead>
-                  <TableHead className="h-12 px-3 text-xs font-medium w-[100px]">Puntos</TableHead>
-                  <TableHead className="h-12 px-3 text-xs font-medium w-[140px]">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {displayOrders.length > 0 ? (
-                  displayOrders.map((order) => (
-                    <TableRow key={order.id} className="hover:bg-muted/50">
-                      <TableCell className="px-3 py-3 font-mono font-semibold text-sm">
-                        {order.numeroOrden}
-                      </TableCell>
-                      <TableCell className="px-3 py-3">
-                        <div>
-                          <p className="font-medium text-sm">{order.userName}</p>
-                          <p className="text-muted-foreground text-xs">{order.userEmail}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell className="px-3 py-3 text-muted-foreground text-sm">
-                        {new Date(order.fechaCreacion).toLocaleDateString("es-CL")}
-                      </TableCell>
-                      <TableCell className="px-3 py-3">
-                        <Badge className={`text-xs ${getEstadoColor(order.estado)}`}>
-                          {getEstadoIcon(order.estado)}
-                          <span className="ml-1 capitalize">{order.estado}</span>
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="px-3 py-3 font-semibold text-primary text-sm">
-                        ${order.total.toLocaleString("es-CL")}
-                      </TableCell>
-                      <TableCell className="px-3 py-3">
-                        <div className="text-sm">
-                          <p className="text-green-600">+{order.puntosGanados}</p>
-                          {order.puntosUsados > 0 && (
-                            <p className="text-red-600">-{order.puntosUsados}</p>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="px-3 py-3">
-                        <div className="flex gap-1">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleViewOrderDetails(order)}
-                            className="h-7 px-2 text-xs"
-                          >
-                            <Eye className="mr-1 h-3 w-3" />
-                            Ver
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleEditOrder(order)}
-                            className="h-7 px-2 text-xs"
-                          >
-                            <Edit className="mr-1 h-3 w-3" />
-                            Editar
-                          </Button>
-                        </div>
+        <div className="hidden md:block overflow-x-auto">
+          <div className="min-w-full inline-block align-middle">
+            <div className="overflow-hidden">
+              <Table className="min-w-full">
+                <TableHeader>
+                  <TableRow className="bg-muted/50 hover:bg-muted/50">
+                    <TableHead className="h-10 px-2 text-[10px] font-medium md:h-11 md:px-2.5 md:text-xs lg:px-3 lg:text-sm w-[14%]">N° Orden</TableHead>
+                    <TableHead className="h-10 px-2 text-[10px] font-medium md:h-11 md:px-2.5 md:text-xs lg:px-3 lg:text-sm w-[22%]">Cliente</TableHead>
+                    <TableHead className="h-10 px-2 text-[10px] font-medium md:h-11 md:px-2.5 md:text-xs lg:px-3 lg:text-sm w-[11%]">Fecha</TableHead>
+                    <TableHead className="h-10 px-2 text-[10px] font-medium md:h-11 md:px-2.5 md:text-xs lg:px-3 lg:text-sm w-[14%]">Estado</TableHead>
+                    <TableHead className="h-10 px-2 text-[10px] font-medium md:h-11 md:px-2.5 md:text-xs lg:px-3 lg:text-sm w-[13%]">Total</TableHead>
+                    <TableHead className="h-10 px-2 text-[10px] font-medium md:h-11 md:px-2.5 md:text-xs lg:px-3 lg:text-sm w-[10%]">Puntos</TableHead>
+                    <TableHead className="h-10 px-2 text-[10px] font-medium md:h-11 md:px-2.5 md:text-xs lg:px-3 lg:text-sm w-[16%]">Acciones</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {displayOrders.length > 0 ? (
+                    displayOrders.map((order) => (
+                      <TableRow key={order.id} className="hover:bg-muted/50">
+                        <TableCell className="px-2 py-2.5 font-mono font-semibold text-xs md:px-2.5 md:py-3 lg:px-3 lg:text-sm">
+                          <div className="truncate">{order.numeroOrden}</div>
+                        </TableCell>
+                        <TableCell className="px-2 py-2.5 md:px-2.5 md:py-3 lg:px-3">
+                          <div className="max-w-[200px]">
+                            <p className="font-medium text-xs lg:text-sm truncate">{order.userName}</p>
+                            <p className="text-muted-foreground text-[10px] lg:text-xs truncate">{order.userEmail}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell className="px-2 py-2.5 text-muted-foreground text-xs md:px-2.5 md:py-3 lg:px-3 lg:text-sm">
+                          <div className="whitespace-nowrap">
+                            {new Date(order.fechaCreacion).toLocaleDateString("es-CL")}
+                          </div>
+                        </TableCell>
+                        <TableCell className="px-2 py-2.5 md:px-2.5 md:py-3 lg:px-3">
+                          <Badge className={`text-[10px] lg:text-xs whitespace-nowrap ${getEstadoColor(order.estado)}`}>
+                            {getEstadoIcon(order.estado)}
+                            <span className="ml-1 capitalize">{order.estado}</span>
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="px-2 py-2.5 font-semibold text-primary text-xs md:px-2.5 md:py-3 lg:px-3 lg:text-sm">
+                          <div className="whitespace-nowrap">
+                            ${(order.total || 0).toLocaleString("es-CL")}
+                          </div>
+                        </TableCell>
+                        <TableCell className="px-2 py-2.5 md:px-2.5 md:py-3 lg:px-3">
+                          <div className="text-xs lg:text-sm whitespace-nowrap">
+                            <p className="text-green-600">+{order.puntosGanados}</p>
+                            {order.puntosUsados > 0 && (
+                              <p className="text-red-600">-{order.puntosUsados}</p>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="px-2 py-2.5 md:px-2.5 md:py-3 lg:px-3">
+                          <div className="flex gap-1 whitespace-nowrap">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleViewOrderDetails(order)}
+                              className="h-7 px-2 text-[10px] lg:h-8 lg:px-2.5 lg:text-xs"
+                            >
+                              <Eye className="mr-0.5 h-3 w-3 lg:mr-1 lg:h-3.5 lg:w-3.5" />
+                              Ver
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEditOrder(order)}
+                              className="h-7 px-2 text-[10px] lg:h-8 lg:px-2.5 lg:text-xs"
+                            >
+                              <Edit className="mr-0.5 h-3 w-3 lg:mr-1 lg:h-3.5 lg:w-3.5" />
+                              Editar
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={7} className="h-24 text-center text-muted-foreground text-xs md:text-sm">
+                        No se encontraron pedidos
                       </TableCell>
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                      No se encontraron pedidos
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         </div>
       </div>
@@ -327,61 +334,79 @@ const Pedidos = () => {
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-background">
       {/* Header Section */}
-      <div className="px-4 py-6 md:px-6 lg:px-8">
+      <div className="px-3 py-4 sm:px-4 sm:py-5 md:px-6 md:py-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="text-center md:text-left">
-            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Pedidos</h1>
-            <p className="mt-2 text-sm text-muted-foreground md:text-base">
+            <h1 className="text-xl font-bold tracking-tight sm:text-2xl md:text-3xl">Pedidos</h1>
+            <p className="mt-1.5 text-xs text-muted-foreground sm:mt-2 sm:text-sm md:text-base">
               Gestiona todos los pedidos y su estado de entrega
             </p>
           </div>
 
           {/* Stats Cards */}
-          <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 md:mt-8 md:grid-cols-6 md:gap-4">
-            <Card className="p-2 transition-all hover:shadow-md md:p-4">
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:mt-5 sm:grid-cols-3 sm:gap-3 md:mt-6 lg:mt-8 lg:grid-cols-6 lg:gap-4">
+            <Card
+              className={`p-3 transition-all hover:shadow-md sm:p-4 lg:p-5 cursor-pointer ${activeTab === "pendiente" ? "ring-2 ring-primary" : ""}`}
+              onClick={() => setActiveTab("pendiente")}
+            >
               <div className="flex flex-col items-center text-center md:items-start md:text-left">
-                <p className="text-[10px] font-medium text-muted-foreground leading-tight md:text-sm">Pendientes</p>
-                <p className="mt-0.5 text-lg font-bold text-yellow-400 md:text-2xl">
+                <p className="text-[10px] font-medium text-muted-foreground leading-tight sm:text-xs md:text-sm">Pendientes</p>
+                <p className="mt-1 text-base font-bold text-yellow-400 sm:text-lg md:text-xl lg:text-2xl">
                   {orders.filter((o) => o.estado === "pendiente").length}
                 </p>
               </div>
             </Card>
-            <Card className="p-2 transition-all hover:shadow-md md:p-4">
+            <Card
+              className={`p-3 transition-all hover:shadow-md sm:p-4 lg:p-5 cursor-pointer ${activeTab === "procesando" ? "ring-2 ring-primary" : ""}`}
+              onClick={() => setActiveTab("procesando")}
+            >
               <div className="flex flex-col items-center text-center md:items-start md:text-left">
-                <p className="text-[10px] font-medium text-muted-foreground leading-tight md:text-sm">Procesando</p>
-                <p className="mt-0.5 text-lg font-bold text-blue-400 md:text-2xl">
+                <p className="text-[10px] font-medium text-muted-foreground leading-tight sm:text-xs md:text-sm">Procesando</p>
+                <p className="mt-1 text-base font-bold text-blue-400 sm:text-lg md:text-xl lg:text-2xl">
                   {orders.filter((o) => o.estado === "procesando").length}
                 </p>
               </div>
             </Card>
-            <Card className="p-2 transition-all hover:shadow-md md:p-4">
+            <Card
+              className={`p-3 transition-all hover:shadow-md sm:p-4 lg:p-5 cursor-pointer ${activeTab === "enviado" ? "ring-2 ring-primary" : ""}`}
+              onClick={() => setActiveTab("enviado")}
+            >
               <div className="flex flex-col items-center text-center md:items-start md:text-left">
-                <p className="text-[10px] font-medium text-muted-foreground leading-tight md:text-sm">Enviados</p>
-                <p className="mt-0.5 text-lg font-bold text-purple-400 md:text-2xl">
+                <p className="text-[10px] font-medium text-muted-foreground leading-tight sm:text-xs md:text-sm">Enviados</p>
+                <p className="mt-1 text-base font-bold text-purple-400 sm:text-lg md:text-xl lg:text-2xl">
                   {orders.filter((o) => o.estado === "enviado").length}
                 </p>
               </div>
             </Card>
-            <Card className="p-2 transition-all hover:shadow-md md:p-4">
+            <Card
+              className={`p-3 transition-all hover:shadow-md sm:p-4 lg:p-5 cursor-pointer ${activeTab === "entregado" ? "ring-2 ring-primary" : ""}`}
+              onClick={() => setActiveTab("entregado")}
+            >
               <div className="flex flex-col items-center text-center md:items-start md:text-left">
-                <p className="text-[10px] font-medium text-muted-foreground leading-tight md:text-sm">Entregados</p>
-                <p className="mt-0.5 text-lg font-bold text-green-400 md:text-2xl">
+                <p className="text-[10px] font-medium text-muted-foreground leading-tight sm:text-xs md:text-sm">Entregados</p>
+                <p className="mt-1 text-base font-bold text-green-400 sm:text-lg md:text-xl lg:text-2xl">
                   {orders.filter((o) => o.estado === "entregado").length}
                 </p>
               </div>
             </Card>
-            <Card className="p-2 transition-all hover:shadow-md md:p-4">
+            <Card
+              className={`p-3 transition-all hover:shadow-md sm:p-4 lg:p-5 cursor-pointer ${activeTab === "cancelado" ? "ring-2 ring-primary" : ""}`}
+              onClick={() => setActiveTab("cancelado")}
+            >
               <div className="flex flex-col items-center text-center md:items-start md:text-left">
-                <p className="text-[10px] font-medium text-muted-foreground leading-tight md:text-sm">Cancelados</p>
-                <p className="mt-0.5 text-lg font-bold text-red-400 md:text-2xl">
+                <p className="text-[10px] font-medium text-muted-foreground leading-tight sm:text-xs md:text-sm">Cancelados</p>
+                <p className="mt-1 text-base font-bold text-red-400 sm:text-lg md:text-xl lg:text-2xl">
                   {orders.filter((o) => o.estado === "cancelado").length}
                 </p>
               </div>
             </Card>
-            <Card className="p-2 transition-all hover:shadow-md md:p-4">
+            <Card
+              className={`p-3 transition-all hover:shadow-md sm:p-4 lg:p-5 cursor-pointer ${activeTab === "rechazado" ? "ring-2 ring-primary" : ""}`}
+              onClick={() => setActiveTab("rechazado")}
+            >
               <div className="flex flex-col items-center text-center md:items-start md:text-left">
-                <p className="text-[10px] font-medium text-muted-foreground leading-tight md:text-sm">Rechazados</p>
-                <p className="mt-0.5 text-lg font-bold text-orange-400 md:text-2xl">
+                <p className="text-[10px] font-medium text-muted-foreground leading-tight sm:text-xs md:text-sm">Rechazados</p>
+                <p className="mt-1 text-base font-bold text-orange-400 sm:text-lg md:text-xl lg:text-2xl">
                   {orders.filter((o) => o.estado === "rechazado").length}
                 </p>
               </div>
@@ -391,34 +416,34 @@ const Pedidos = () => {
       </div>
 
       {/* Main Content */}
-      <div className="px-4 pb-6 md:px-6 lg:px-8">
+      <div className="px-3 pb-6 sm:px-4 md:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <Card className="shadow-sm">
             <div className="p-4 md:p-6">
               {/* Mobile: Tabs first, then Search */}
               <div className="block md:hidden">
                 {/* Tabs */}
-                <Tabs defaultValue="todos" className="mb-4">
-                  <TabsList className="grid h-10 w-full grid-cols-7">
-                    <TabsTrigger value="todos" className="text-xs">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
+                  <TabsList className="flex h-auto w-full overflow-x-auto justify-start gap-2 bg-transparent p-0">
+                    <TabsTrigger value="todos" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full border px-4 py-2 text-xs">
                       Todos
                     </TabsTrigger>
-                    <TabsTrigger value="pendiente" className="text-xs">
+                    <TabsTrigger value="pendiente" className="data-[state=active]:bg-yellow-500 data-[state=active]:text-white rounded-full border px-4 py-2 text-xs">
                       Pendientes
                     </TabsTrigger>
-                    <TabsTrigger value="procesando" className="text-xs">
+                    <TabsTrigger value="procesando" className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-full border px-4 py-2 text-xs">
                       Procesando
                     </TabsTrigger>
-                    <TabsTrigger value="enviado" className="text-xs">
+                    <TabsTrigger value="enviado" className="data-[state=active]:bg-purple-500 data-[state=active]:text-white rounded-full border px-4 py-2 text-xs">
                       Enviados
                     </TabsTrigger>
-                    <TabsTrigger value="entregado" className="text-xs">
+                    <TabsTrigger value="entregado" className="data-[state=active]:bg-green-500 data-[state=active]:text-white rounded-full border px-4 py-2 text-xs">
                       Entregados
                     </TabsTrigger>
-                    <TabsTrigger value="cancelado" className="text-xs">
+                    <TabsTrigger value="cancelado" className="data-[state=active]:bg-red-500 data-[state=active]:text-white rounded-full border px-4 py-2 text-xs">
                       Cancelados
                     </TabsTrigger>
-                    <TabsTrigger value="rechazado" className="text-xs">
+                    <TabsTrigger value="rechazado" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white rounded-full border px-4 py-2 text-xs">
                       Rechazados
                     </TabsTrigger>
                   </TabsList>
@@ -481,7 +506,7 @@ const Pedidos = () => {
                 </div>
 
                 {/* Tabs */}
-                <Tabs defaultValue="todos" className="mt-6">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
                   <TabsList className="grid h-10 w-full grid-cols-7 md:h-11">
                     <TabsTrigger value="todos" className="text-xs md:text-sm">
                       Todos

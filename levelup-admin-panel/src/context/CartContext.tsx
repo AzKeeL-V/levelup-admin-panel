@@ -113,6 +113,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           unitPrice: product.precio,
           totalPrice: quantity * product.precio,
           puntosGanados: product.puntos,
+          productDatabaseId: product.id,
+          purchaseMethod: 'money',
         };
         newItems = [...prevCart.items, newItem];
         toast.success("Producto añadido al carrito");

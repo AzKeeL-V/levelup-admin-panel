@@ -21,8 +21,7 @@ public class Address {
     private String numero;
     private String apartamento;
     private String ciudad;
-    private String comuna;
     private String region;
-    private String codigoPostal;
-    private String pais;
+    private String telefono;
+
 }

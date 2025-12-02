@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,7 +19,7 @@ interface BlogDialogProps {
 
 const BlogDialog = ({ open, onOpenChange, blogItem, onSave }: BlogDialogProps) => {
   const [formData, setFormData] = useState({
-    tipo: "nota" as "video" | "nota" | "evento",
+    tipo: "evento" as "video" | "nota" | "evento",
     titulo: "",
     descripcion: "",
     fecha: "",
@@ -62,7 +62,7 @@ const BlogDialog = ({ open, onOpenChange, blogItem, onSave }: BlogDialogProps) =
       });
     } else {
       setFormData({
-        tipo: "nota",
+        tipo: "evento",
         titulo: "",
         descripcion: "",
         fecha: "",
@@ -86,8 +86,59 @@ const BlogDialog = ({ open, onOpenChange, blogItem, onSave }: BlogDialogProps) =
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validaciones básicas
     if (!formData.titulo.trim() || !formData.descripcion.trim() || !formData.fecha) {
-      toast.error("Por favor completa todos los campos requeridos");
+      toast.error("Por favor completa todos los campos requeridos (Título, Descripción, Fecha)");
+      return;
+    }
+
+    if (formData.titulo.trim().length < 5) {
+      toast.error("El título debe tener al menos 5 caracteres");
+      return;
+    }
+
+    if (formData.descripcion.trim().length < 10) {
+      toast.error("La descripción debe tener al menos 10 caracteres");
+      return;
+    }
+
+    // Validación de fecha
+    const dateObj = new Date(formData.fecha);
+    const year = dateObj.getFullYear();
+
+    if (isNaN(year)) {
+      toast.error("Fecha inválida");
+      return;
+    }
+
+    if (year < 1930) {
+      toast.error("El año debe ser 1930 o posterior");
+      return;
+    }
+
+    if (year > 2100) {
+      toast.error("El año no puede ser mayor a 2100");
+      return;
+    }
+
+    // Validaciones específicas de Evento
+    if (!formData.direccion.trim()) {
+      toast.error("La dirección del evento es obligatoria");
+      return;
+    }
+
+    if (!formData.horaInicio || !formData.horaFin) {
+      toast.error("Debes especificar la hora de inicio y término");
+      return;
+    }
+
+    if (formData.horaInicio >= formData.horaFin) {
+      toast.error("La hora de término debe ser posterior a la hora de inicio");
+      return;
+    }
+
+    if (formData.puntos && parseInt(formData.puntos) < 0) {
+      toast.error("Los puntos no pueden ser negativos");
       return;
     }
 
@@ -114,10 +165,10 @@ const BlogDialog = ({ open, onOpenChange, blogItem, onSave }: BlogDialogProps) =
       };
 
       await onSave(itemData);
-      toast.success(blogItem ? "Contenido actualizado correctamente" : "Contenido creado correctamente");
+      toast.success(blogItem ? "Evento actualizado correctamente" : "Evento creado correctamente");
       onOpenChange(false);
     } catch (error) {
-      toast.error("Error al guardar el contenido");
+      toast.error("Error al guardar el evento");
     } finally {
       setLoading(false);
     }
@@ -149,56 +200,29 @@ const BlogDialog = ({ open, onOpenChange, blogItem, onSave }: BlogDialogProps) =
     }
   };
 
+  const handleAddressBlur = () => {
+    if (formData.direccion && !formData.ubicacionUrl) {
+      const generatedUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(formData.direccion)}`;
+      setFormData(prev => ({ ...prev, ubicacionUrl: generatedUrl }));
+      toast.info("URL de mapa generada automáticamente");
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {blogItem ? "Editar Contenido" : "Nuevo Contenido"}
-            {formData.tipo && (
-              <Badge className={getTypeColor(formData.tipo)}>
-                {getTypeIcon(formData.tipo)}
-                <span className="ml-1 capitalize">{formData.tipo}</span>
-              </Badge>
-            )}
+            {blogItem ? "Editar Evento" : "Nuevo Evento"}
           </DialogTitle>
+          <DialogDescription>
+            Completa el formulario para {blogItem ? "editar el" : "crear un nuevo"} evento.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="tipo">Tipo de Contenido *</Label>
-              <Select
-                value={formData.tipo}
-                onValueChange={(value: "video" | "nota" | "evento") =>
-                  setFormData(prev => ({ ...prev, tipo: value }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecciona el tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="nota">
-                    <div className="flex items-center gap-2">
-                      <FileText className="w-4 h-4" />
-                      Nota
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="video">
-                    <div className="flex items-center gap-2">
-                      <Video className="w-4 h-4" />
-                      Video
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="evento">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4" />
-                      Evento
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Tipo de Contenido removed - forced to 'evento' */}
 
             <div className="space-y-2">
               <Label htmlFor="estado">Estado *</Label>
@@ -331,54 +355,69 @@ const BlogDialog = ({ open, onOpenChange, blogItem, onSave }: BlogDialogProps) =
               </div>
             </div>
 
-            {/* Event-specific fields */}
-            {formData.tipo === "evento" && (
-              <div className="space-y-4 border-t pt-4">
-                <h4 className="text-sm font-medium text-muted-foreground">Información del Evento</h4>
+            {/* Event fields always visible */}
+            <div className="space-y-4 border-t pt-4">
+              <h4 className="text-sm font-medium text-muted-foreground">Información del Evento</h4>
 
+              <div className="space-y-2">
+                <Label htmlFor="direccion">Dirección del evento</Label>
+                <Input
+                  id="direccion"
+                  value={formData.direccion}
+                  onChange={(e) => setFormData(prev => ({ ...prev, direccion: e.target.value }))}
+                  onBlur={handleAddressBlur}
+                  placeholder="Ej: Av. Providencia 123, Santiago"
+                />
+              </div>
+
+              {/* Map Preview */}
+              {formData.direccion && (
+                <div className="w-full h-[200px] rounded-md overflow-hidden border">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    frameBorder="0"
+                    scrolling="no"
+                    marginHeight={0}
+                    marginWidth={0}
+                    src={`https://maps.google.com/maps?q=${encodeURIComponent(formData.direccion)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+                    title="Vista previa del mapa"
+                  ></iframe>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="direccion">Dirección del evento</Label>
+                  <Label htmlFor="horaInicio">Hora de inicio</Label>
                   <Input
-                    id="direccion"
-                    value={formData.direccion}
-                    onChange={(e) => setFormData(prev => ({ ...prev, direccion: e.target.value }))}
-                    placeholder="Ej: Av. Providencia 123, Santiago"
+                    id="horaInicio"
+                    type="time"
+                    value={formData.horaInicio}
+                    onChange={(e) => setFormData(prev => ({ ...prev, horaInicio: e.target.value }))}
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="horaInicio">Hora de inicio</Label>
-                    <Input
-                      id="horaInicio"
-                      type="time"
-                      value={formData.horaInicio}
-                      onChange={(e) => setFormData(prev => ({ ...prev, horaInicio: e.target.value }))}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="horaFin">Hora de término</Label>
-                    <Input
-                      id="horaFin"
-                      type="time"
-                      value={formData.horaFin}
-                      onChange={(e) => setFormData(prev => ({ ...prev, horaFin: e.target.value }))}
-                    />
-                  </div>
-                </div>
-
                 <div className="space-y-2">
-                  <Label htmlFor="ubicacionUrl">URL de Google Maps</Label>
+                  <Label htmlFor="horaFin">Hora de término</Label>
                   <Input
-                    id="ubicacionUrl"
-                    value={formData.ubicacionUrl}
-                    onChange={(e) => setFormData(prev => ({ ...prev, ubicacionUrl: e.target.value }))}
-                    placeholder="https://maps.google.com/..."
+                    id="horaFin"
+                    type="time"
+                    value={formData.horaFin}
+                    onChange={(e) => setFormData(prev => ({ ...prev, horaFin: e.target.value }))}
                   />
                 </div>
               </div>
-            )}
+
+              <div className="space-y-2">
+                <Label htmlFor="ubicacionUrl">URL de Google Maps (Opcional)</Label>
+                <Input
+                  id="ubicacionUrl"
+                  value={formData.ubicacionUrl}
+                  onChange={(e) => setFormData(prev => ({ ...prev, ubicacionUrl: e.target.value }))}
+                  placeholder="https://maps.google.com/..."
+                />
+              </div>
+            </div>
 
             <div className="space-y-2">
               <Label htmlFor="videoUrl">URL del video</Label>

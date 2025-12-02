@@ -11,7 +11,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -23,6 +22,8 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "users")
+@com.fasterxml.jackson.annotation.JsonIdentityInfo(generator = com.fasterxml.jackson.annotation.ObjectIdGenerators.PropertyGenerator.class, property = "id")
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
 public class User implements UserDetails {
 
     @Id
@@ -43,28 +44,70 @@ public class User implements UserDetails {
 
     private String tipo; // "duoc" | "normal"
 
-    @Builder.Default
-    private Integer puntos = 0;
+    private Integer puntos;
 
-    @Builder.Default
-    private String nivel = "bronce"; // "bronce" | "plata" | "oro" | "diamante"
+    private String nivel; // "bronce" | "plata" | "oro" | "diamante"
 
     private String telefono;
 
     private String codigoReferido; // Código único de referido del usuario
 
-    @Builder.Default
-    private Boolean activo = true;
+    private Boolean activo;
 
     @ElementCollection
     @CollectionTable(name = "user_addresses", joinColumns = @JoinColumn(name = "user_id"))
-    @Builder.Default
-    private List<Address> direcciones = new ArrayList<>();
+    private List<Address> direcciones;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    // Preferencias
+    private String metodoPagoPreferido;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "user_id")
+    private List<PaymentMethod> metodosPago;
+
+    @ElementCollection
+    @CollectionTable(name = "user_interests", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "interest")
+    private List<String> intereses;
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "email", column = @Column(name = "pref_email")),
+            @AttributeOverride(name = "sms", column = @Column(name = "pref_sms"))
+    })
+    private CommunicationPreferences preferenciasComunicacion;
+
+    // Legal
+    private Boolean aceptaTerminos;
+
+    private Boolean aceptaPoliticaPrivacidad;
+
+    // Sistema
+    @Column(name = "fecha_registro")
+    private java.time.LocalDateTime fechaRegistro;
+
+    @Column(name = "ultimo_acceso")
+    private java.time.LocalDateTime ultimoAcceso;
+
+    private String referidoPor;
+
+    @PrePersist
+    protected void onCreate() {
+        if (fechaRegistro == null) {
+            fechaRegistro = java.time.LocalDateTime.now();
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        ultimoAcceso = java.time.LocalDateTime.now();
+    }
+
     @Override
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
     }

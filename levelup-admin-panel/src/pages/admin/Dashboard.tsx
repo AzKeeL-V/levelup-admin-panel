@@ -4,8 +4,10 @@ import { useProducts } from "@/context/ProductContext";
 import { useUsers } from "@/context/UserContext";
 import { useOrders } from "@/context/OrderContext";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const { products, getTotalInventoryValue } = useProducts();
   const { users, loading: usersLoading } = useUsers();
   const { orders, loading: ordersLoading, getOrderStats } = useOrders();
@@ -41,6 +43,7 @@ const Dashboard = () => {
       icon: Users,
       change: "+12.5%",
       color: "text-accent",
+      path: "/admin/usuarios",
     },
     {
       title: "Valor Total Inventario",
@@ -48,6 +51,7 @@ const Dashboard = () => {
       icon: DollarSign,
       change: "Actualizado",
       color: "text-primary",
+      path: "/admin/productos",
     },
     {
       title: "Productos Únicos",
@@ -55,6 +59,7 @@ const Dashboard = () => {
       icon: Package,
       change: "En catálogo",
       color: "text-accent",
+      path: "/admin/productos",
     },
     {
       title: "Total Pedidos",
@@ -62,6 +67,7 @@ const Dashboard = () => {
       icon: ShoppingCart,
       change: statsLoading ? "..." : `$${orderStats?.totalRevenue?.toLocaleString("es-CL") || 0} ventas`,
       color: "text-primary",
+      path: "/admin/pedidos",
     },
   ];
 
@@ -86,7 +92,11 @@ const Dashboard = () => {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => (
-          <Card key={stat.title} className="p-6 bg-card border-border hover:shadow-[var(--shadow-glow)] transition-shadow duration-300">
+          <Card
+            key={stat.title}
+            className="p-6 bg-card border-border hover:shadow-[var(--shadow-glow)] transition-all duration-300 cursor-pointer hover:scale-105"
+            onClick={() => navigate(stat.path)}
+          >
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm text-muted-foreground mb-1">{stat.title}</p>
@@ -201,10 +211,10 @@ const Dashboard = () => {
               <div className="text-right">
                 <p className="font-semibold text-primary">${order.total.toLocaleString("es-CL")}</p>
                 <p className={`text-sm capitalize ${order.estado === 'entregado' ? 'text-green-600' :
-                    order.estado === 'enviado' ? 'text-purple-600' :
-                      order.estado === 'procesando' ? 'text-blue-600' :
-                        order.estado === 'pendiente' ? 'text-yellow-600' :
-                          'text-red-600'
+                  order.estado === 'enviado' ? 'text-purple-600' :
+                    order.estado === 'procesando' ? 'text-blue-600' :
+                      order.estado === 'pendiente' ? 'text-yellow-600' :
+                        'text-red-600'
                   }`}>
                   {order.estado}
                 </p>

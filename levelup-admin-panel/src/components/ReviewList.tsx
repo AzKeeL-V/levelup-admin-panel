@@ -106,12 +106,12 @@ export const ReviewList = ({ productId, className = "" }: ReviewListProps) => {
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                   <span className="text-white font-semibold text-sm">
-                    {review.userName.charAt(0).toUpperCase()}
+                    {review.userName?.charAt(0).toUpperCase() || '?'}
                   </span>
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h4 className="text-white font-semibold">{review.userName}</h4>
+                    <h4 className="text-white font-semibold">{review.userName || 'Usuario'}</h4>
                     {review.verified && (
                       <Badge variant="outline" className="border-green-500 text-green-400 text-xs">
                         <CheckCircle className="w-3 h-3 mr-1" />

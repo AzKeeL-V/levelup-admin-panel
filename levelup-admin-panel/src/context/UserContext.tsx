@@ -55,10 +55,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const initSession = async () => {
       if (AuthService.isAuthenticated()) {
         // Token exists, try to load user
-        // For now, we rely on loadUsers finding the user by email if we stored it?
-        // Or we should fetch /me.
-        // Since we don't have /me fetch implemented in frontend yet, let's try to restore from localStorage "current_user"
-        // which is legacy but useful.
         const storedUser = localStorage.getItem("current_user");
         if (storedUser) {
           const parsedUser = JSON.parse(storedUser);
@@ -67,23 +63,66 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
             parsedUser.rol = parsedUser.rol.toLowerCase();
           }
           setCurrentUser(parsedUser);
-        } else {
-          // If we have token but no user in local storage, we should fetch it.
-          // TODO: Implement fetch current user from API
-          // For now, reload users and try to match? We don't have email in token easily accessible without decoding.
-          // AuthService.getToken() gives raw token.
-          // Let's just load users.
-          await loadUsers();
         }
+        // Always load users to populate the list and set loading to false
+        await loadUsers();
       } else {
         // No token
         localStorage.removeItem("current_user");
-        await loadUsers();
+        setCurrentUser(null);
+        setLoading(false); // Set loading to false when not authenticated
       }
     };
 
     initSession();
+
+    // Listen for storage changes (logout in other tabs)
+    const handleStorageChange = (e: StorageEvent) => {
+      // If token was removed in another tab, logout this tab too
+      if (e.key === "levelup_auth_token" && e.newValue === null) {
+        console.log("UserContext: Token removed in another tab, logging out");
+        setCurrentUser(null);
+        localStorage.removeItem("current_user");
+        // Redirect to home
+        window.location.href = "/";
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
   }, [loadUsers]);
+
+  // Sync currentUser with latest data from backend
+  useEffect(() => {
+    const syncUser = async () => {
+      if (currentUser?.id) {
+        try {
+          const freshUser = await UserRepository.findById(currentUser.id);
+          if (freshUser) {
+            // Only update if there are actual changes (compare key fields)
+            const hasChanges =
+              freshUser.puntos !== currentUser.puntos ||
+              freshUser.nivel !== currentUser.nivel ||
+              freshUser.direcciones?.length !== currentUser.direcciones?.length ||
+              freshUser.metodosPago?.length !== currentUser.metodosPago?.length;
+
+            if (hasChanges) {
+              console.log("UserContext: Syncing currentUser with fresh data from backend");
+              setCurrentUser(freshUser);
+              localStorage.setItem("current_user", JSON.stringify(freshUser));
+            }
+          }
+        } catch (error) {
+          console.error("UserContext: Error syncing user:", error);
+        }
+      }
+    };
+
+    syncUser();
+  }, [currentUser?.id]); // Only sync when user ID changes (login/logout)
 
   const login = useCallback(async (email: string, password: string) => {
     try {
@@ -145,7 +184,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           nivel: "bronce",
           preferenciasComunicacion: { email: true, sms: false },
           intereses: [],
-          newsletter: false,
           aceptaTerminos: true,
           aceptaPoliticaPrivacidad: true,
           captchaVerificado: true,
@@ -179,8 +217,22 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       console.log("UserContext.addUser: Creating user with email:", user.correo);
       setError(null);
 
+      // Extract first address if available
+      const primaryAddress = user.direcciones && user.direcciones.length > 0 ? user.direcciones[0] : null;
+
       // Call backend register
-      await AuthService.register(user.nombre, user.correo, user.contraseña, user.telefono, user.rut, user.referidoPor);
+      await AuthService.register(
+        user.nombre,
+        user.correo,
+        user.contraseña,
+        user.telefono,
+        user.rut,
+        user.referidoPor,
+        primaryAddress?.calle,
+        primaryAddress?.numero,
+        primaryAddress?.ciudad,
+        primaryAddress?.region
+      );
 
       // Reload users to get the new user with ID
       await loadUsers();

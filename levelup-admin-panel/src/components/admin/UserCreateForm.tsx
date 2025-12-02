@@ -1,69 +1,39 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { AlertCircle, CheckCircle, UserPlus, X } from "lucide-react";
+import { AlertCircle, CheckCircle, UserPlus } from "lucide-react";
 import { useUsers } from "@/context/UserContext";
 import { User } from "@/types/User";
 import { validateRut } from "@/utils/validationUtils";
 
-// Lista de intereses disponibles para el usuario (categorías de productos)
-const AVAILABLE_INTERESTS = [
-  "Juegos de Mesa",
-  "Accesorios",
-  "Consolas",
-  "Computadores Gamers",
-  "Sillas Gamers",
-  "Mouse",
-  "Mousepad",
-  "Poleras Personalizadas"
+// Regiones de Chile
+const CHILEAN_REGIONS = [
+  "Arica y Parinacota",
+  "Tarapacá",
+  "Antofagasta",
+  "Atacama",
+  "Coquimbo",
+  "Valparaíso",
+  "Metropolitana de Santiago",
+  "Libertador General Bernardo O'Higgins",
+  "Maule",
+  "Ñuble",
+  "Biobío",
+  "La Araucanía",
+  "Los Ríos",
+  "Los Lagos",
+  "Aysén del General Carlos Ibáñez del Campo",
+  "Magallanes y de la Antártica Chilena"
 ];
-
-// Regiones de Chile con sus ciudades principales
-const CHILEAN_REGIONS_CITIES: Record<string, string[]> = {
-  "Arica y Parinacota": ["Arica", "Putre", "General Lagos"],
-  "Tarapacá": ["Iquique", "Alto Hospicio", "Pozo Almonte"],
-  "Antofagasta": ["Antofagasta", "Calama", "Tocopilla"],
-  "Atacama": ["Copiapó", "Vallenar", "Chañaral"],
-  "Coquimbo": ["La Serena", "Coquimbo", "Ovalle"],
-  "Valparaíso": ["Valparaíso", "Viña del Mar", "Quilpué"],
-  "Metropolitana de Santiago": ["Santiago", "Puente Alto", "Maipú", "La Florida", "Peñalolén", "Las Condes", "Providencia"],
-  "Libertador General Bernardo O'Higgins": ["Rancagua", "Rengo", "San Vicente"],
-  "Maule": ["Talca", "Curicó", "Linares"],
-  "Ñuble": ["Chillán", "Chillán Viejo", "Bulnes"],
-  "Biobío": ["Concepción", "Talcahuano", "Chiguayante"],
-  "La Araucanía": ["Temuco", "Padre Las Casas", "Villarrica"],
-  "Los Ríos": ["Valdivia", "La Unión", "Río Bueno"],
-  "Los Lagos": ["Puerto Montt", "Puerto Varas", "Osorno"],
-  "Aysén del General Carlos Ibáñez del Campo": ["Coyhaique", "Puerto Aysén", "Chile Chico"],
-  "Magallanes y de la Antártica Chilena": ["Punta Arenas", "Puerto Natales", "Porvenir"]
-};
-
-const CHILEAN_REGIONS = Object.keys(CHILEAN_REGIONS_CITIES);
 
 interface UserCreateFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onUserCreated?: () => void;
-}
-
-interface ValidationErrors {
-  nombre?: string;
-  correo?: string;
-  contraseña?: string;
-  rut?: string;
-  telefono?: string;
-  calle?: string;
-  numero?: string;
-  ciudad?: string;
-  region?: string;
-  comuna?: string;
-  codigoPostal?: string;
 }
 
 interface FieldValidation {
@@ -72,211 +42,141 @@ interface FieldValidation {
 }
 
 const UserCreateForm = ({ open, onOpenChange, onUserCreated }: UserCreateFormProps) => {
-  // Estado del formulario - datos del nuevo usuario
   const [formData, setFormData] = useState({
     nombre: "",
     correo: "",
     contraseña: "",
     rut: "",
-    telefono: "",
+    telefono: "+569",
     tipo: "normal" as "normal" | "duoc",
+    rol: "user" as "user" | "admin",
     // Dirección
     calle: "",
     numero: "",
     apartamento: "",
     ciudad: "",
-    comuna: "",
     region: "",
-    codigoPostal: "",
-    // Preferencias
-    newsletter: false,
-    intereses: [] as string[],
+
     aceptaTerminos: false,
     aceptaPoliticaPrivacidad: false,
   });
 
-  // Función para obtener las ciudades de una región
-  const getCitiesForRegion = (region: string) => {
-    return CHILEAN_REGIONS_CITIES[region] || [];
-  };
-
-  // Limpiar ciudad cuando cambia la región
-  useEffect(() => {
-    if (formData.region && !getCitiesForRegion(formData.region).includes(formData.ciudad)) {
-      updateField('ciudad', '');
-    }
-  }, [formData.region]);
-
-  // Estado de validación de campos
   const [fieldValidation, setFieldValidation] = useState<Record<string, FieldValidation>>({});
-
-  // Estado de carga y errores
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-
-  // Estado para beneficio DUOC detectado
   const [duocBenefitDetected, setDuocBenefitDetected] = useState(false);
 
-  // Hook para acceder a las funciones del contexto de usuarios
   const { addUser } = useUsers();
 
-  // Función para validar un campo individual en tiempo real
+  // Validación de campos
   const validateField = (fieldName: string, value: any): FieldValidation => {
     switch (fieldName) {
       case 'nombre':
-        if (!value?.trim()) {
-          return { isValid: false, error: "El nombre es obligatorio" };
-        }
-        if (value.trim().length < 2) {
-          return { isValid: false, error: "El nombre debe tener al menos 2 caracteres" };
-        }
+        if (!value?.trim()) return { isValid: false, error: "El nombre es obligatorio" };
+        if (value.trim().length < 2) return { isValid: false, error: "Mínimo 2 caracteres" };
         return { isValid: true };
 
       case 'correo':
-        if (!value?.trim()) {
-          return { isValid: false, error: "El correo es obligatorio" };
-        }
+        if (!value?.trim()) return { isValid: false, error: "El correo es obligatorio" };
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(value)) {
-          return { isValid: false, error: "Formato de correo inválido" };
-        }
+        if (!emailRegex.test(value)) return { isValid: false, error: "Formato inválido" };
         return { isValid: true };
 
       case 'contraseña':
-        if (!value?.trim()) {
-          return { isValid: false, error: "La contraseña es obligatoria" };
-        }
-        if (value.length < 6) {
-          return { isValid: false, error: "La contraseña debe tener al menos 6 caracteres" };
-        }
+        if (!value?.trim()) return { isValid: false, error: "La contraseña es obligatoria" };
+        if (value.length < 6) return { isValid: false, error: "Mínimo 6 caracteres" };
         return { isValid: true };
 
       case 'rut':
-        if (!value?.trim()) {
-          return { isValid: false, error: "El RUT es obligatorio" };
-        }
-        // Validación completa del RUT usando la función validateRut
-        if (!validateRut(value)) {
-          return { isValid: false, error: "El RUT no es válido (ej: 12.345.678-5)" };
-        }
+        if (!value?.trim()) return { isValid: false, error: "El RUT es obligatorio" };
+        if (!validateRut(value)) return { isValid: false, error: "RUT inválido (ej: 12.345.678-5)" };
         return { isValid: true };
 
       case 'telefono':
-        if (!value?.trim()) {
-          return { isValid: false, error: "El teléfono es obligatorio" };
-        }
+        if (!value?.trim()) return { isValid: false, error: "El teléfono es obligatorio" };
         const phoneRegex = /^\+569\d{8}$/;
-        if (!phoneRegex.test(value)) {
-          return { isValid: false, error: "Formato inválido (ej: +56912345678)" };
-        }
+        if (!phoneRegex.test(value)) return { isValid: false, error: "Debe ser +569 seguido de 8 dígitos" };
         return { isValid: true };
 
       case 'calle':
-        if (!value?.trim()) {
-          return { isValid: false, error: "La calle es obligatoria" };
-        }
+        if (!value?.trim()) return { isValid: false, error: "La calle es obligatoria" };
         return { isValid: true };
 
       case 'numero':
-        if (!value?.trim()) {
-          return { isValid: false, error: "El número es obligatorio" };
-        }
-        if (isNaN(Number(value))) {
-          return { isValid: false, error: "El número debe ser válido" };
-        }
+        if (!value?.trim()) return { isValid: false, error: "El número es obligatorio" };
         return { isValid: true };
 
       case 'ciudad':
-        if (!value?.trim()) {
-          return { isValid: false, error: "La ciudad es obligatoria" };
-        }
+        if (!value?.trim()) return { isValid: false, error: "La ciudad es obligatoria" };
         return { isValid: true };
 
       case 'region':
-        if (!value?.trim()) {
-          return { isValid: false, error: "La región es obligatoria" };
-        }
+        if (!value?.trim()) return { isValid: false, error: "La región es obligatoria" };
         return { isValid: true };
 
-      case 'comuna':
-        if (!value?.trim()) {
-          return { isValid: false, error: "La comuna es obligatoria" };
-        }
-        return { isValid: true };
 
-      case 'codigoPostal':
-        if (!value?.trim()) {
-          return { isValid: false, error: "El código postal es obligatorio" };
-        }
-        if (value.length !== 7 || isNaN(Number(value))) {
-          return { isValid: false, error: "Código postal debe tener 7 dígitos" };
-        }
-        return { isValid: true };
 
       default:
         return { isValid: true };
     }
   };
 
-  // Función para actualizar un campo del formulario y validar en tiempo real
+  // Formatear número de teléfono
+  const formatPhoneNumber = (value: string) => {
+    // Remover todo excepto dígitos
+    const digits = value.replace(/\D/g, '');
+
+    // Si empieza con 569, mantenerlo, sino agregarlo
+    if (digits.startsWith('569')) {
+      return '+' + digits.slice(0, 11); // +569 + 8 dígitos = 11 total
+    } else {
+      // Tomar solo los últimos dígitos después de 569
+      const phoneDigits = digits.replace(/^569/, '').slice(0, 8);
+      return '+569' + phoneDigits;
+    }
+  };
+
+  // Actualizar campo
   const updateField = (fieldName: string, value: any) => {
-    setFormData(prev => ({ ...prev, [fieldName]: value }));
+    let processedValue = value;
 
-    // Validar el campo inmediatamente
-    const validation = validateField(fieldName, value);
-    setFieldValidation(prev => ({
-      ...prev,
-      [fieldName]: validation
-    }));
-
-    // Limpiar error de submit si existe
-    if (submitError) {
-      setSubmitError(null);
+    // Formatear teléfono automáticamente
+    if (fieldName === 'telefono') {
+      processedValue = formatPhoneNumber(value);
     }
 
-    // Detectar beneficio DUOC cuando se escribe el correo
+    setFormData(prev => ({ ...prev, [fieldName]: processedValue }));
+
+    // Validar
+    const validation = validateField(fieldName, processedValue);
+    setFieldValidation(prev => ({ ...prev, [fieldName]: validation }));
+
+    if (submitError) setSubmitError(null);
+
+    // Detectar beneficio DUOC
     if (fieldName === 'correo' && value) {
       const isDuocEmail = value.toLowerCase().includes('@duoc.cl') || value.toLowerCase().includes('@duocuc.cl');
       setDuocBenefitDetected(isDuocEmail);
-
-      // Si es correo DUOC, cambiar automáticamente el tipo a "duoc"
       if (isDuocEmail) {
         setFormData(prev => ({ ...prev, tipo: "duoc" }));
       }
     }
   };
 
-  // Función para agregar/quitar intereses
-  const toggleInterest = (interest: string) => {
-    setFormData(prev => ({
-      ...prev,
-      intereses: prev.intereses.includes(interest)
-        ? prev.intereses.filter(i => i !== interest)
-        : [...prev.intereses, interest]
-    }));
-  };
-
-  // Función para verificar si todos los campos requeridos son válidos
+  // Verificar si el formulario es válido
   const isFormValid = () => {
-    const requiredFields = ['nombre', 'correo', 'contraseña', 'rut', 'telefono', 'calle', 'numero', 'ciudad', 'region', 'codigoPostal'];
-
-    // Verificar que todos los campos requeridos estén validados y sean válidos
-    const allRequiredValid = requiredFields.every(field =>
-      fieldValidation[field]?.isValid === true
-    );
-
-    // Verificar términos y condiciones
+    const requiredFields = ['nombre', 'correo', 'contraseña', 'rut', 'telefono', 'calle', 'numero', 'ciudad', 'region'];
+    const allRequiredValid = requiredFields.every(field => fieldValidation[field]?.isValid === true);
     const termsAccepted = formData.aceptaTerminos && formData.aceptaPoliticaPrivacidad;
-
     return allRequiredValid && termsAccepted;
   };
 
-  // Función para manejar el envío del formulario
+  // Enviar formulario
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!isFormValid()) {
-      setSubmitError("Por favor complete todos los campos requeridos correctamente");
+      setSubmitError("Por favor complete todos los campos correctamente");
       return;
     }
 
@@ -284,71 +184,55 @@ const UserCreateForm = ({ open, onOpenChange, onUserCreated }: UserCreateFormPro
     setSubmitError(null);
 
     try {
-      // Preparar los datos del usuario para enviar al backend
       const userData: Omit<User, "id"> = {
         nombre: formData.nombre.trim(),
         correo: formData.correo.trim().toLowerCase(),
-        contraseña: formData.contraseña, // En producción se hashea
+        contraseña: formData.contraseña,
         rut: formData.rut,
         tipo: formData.tipo,
-        puntos: 0, // Valor inicial
-        nivel: "bronce", // Nivel inicial
+        puntos: 0,
+        nivel: "bronce",
         telefono: formData.telefono,
+        rol: formData.rol,
         direcciones: [{
           calle: formData.calle.trim(),
           numero: formData.numero.trim(),
           apartamento: formData.apartamento.trim() || undefined,
-          ciudad: formData.ciudad || "",
-          comuna: formData.comuna.trim(),
-          region: formData.region,
-          codigoPostal: formData.codigoPostal,
-          pais: "Chile"
+          ciudad: formData.ciudad.trim(),
+          region: formData.region
         }],
-        preferenciasComunicacion: {
-          email: true,
-          sms: false
-        },
-        newsletter: formData.newsletter,
-        intereses: formData.intereses,
+        preferenciasComunicacion: { email: true, sms: false },
+        intereses: [],
         aceptaTerminos: formData.aceptaTerminos,
         aceptaPoliticaPrivacidad: formData.aceptaPoliticaPrivacidad,
-        captchaVerificado: true, // Simulado para el formulario
+        captchaVerificado: true,
         fechaRegistro: new Date().toISOString(),
         activo: true,
-        codigoReferido: `REF-${Date.now()}`, // Código único generado
+        codigoReferido: `REF-${Date.now()}`,
       };
 
-      // Llamar a la función del contexto para crear el usuario
       await addUser(userData);
 
-      // Limpiar el formulario
+      // Limpiar formulario
       setFormData({
         nombre: "",
         correo: "",
         contraseña: "",
         rut: "",
-        telefono: "",
+        telefono: "+569",
         tipo: "normal",
+        rol: "user",
         calle: "",
         numero: "",
         apartamento: "",
         ciudad: "",
-        comuna: "",
         region: "",
-        codigoPostal: "",
-        newsletter: false,
-        intereses: [],
         aceptaTerminos: false,
         aceptaPoliticaPrivacidad: false,
       });
 
-      // Resetear validaciones
       setFieldValidation({});
-
-      // Cerrar el modal
       onOpenChange(false);
-
-      // Notificar al componente padre
       onUserCreated?.();
 
     } catch (error) {
@@ -359,30 +243,25 @@ const UserCreateForm = ({ open, onOpenChange, onUserCreated }: UserCreateFormPro
     }
   };
 
-  // Función para cerrar el modal y limpiar el estado
+  // Cerrar modal
   const handleClose = () => {
-    if (isSubmitting) return; // No cerrar si está enviando
-
+    if (isSubmitting) return;
     setFormData({
       nombre: "",
       correo: "",
       contraseña: "",
       rut: "",
-      telefono: "",
+      telefono: "+569",
       tipo: "normal",
+      rol: "user",
       calle: "",
       numero: "",
       apartamento: "",
       ciudad: "",
-      comuna: "",
       region: "",
-      codigoPostal: "",
-      newsletter: false,
-      intereses: [],
       aceptaTerminos: false,
       aceptaPoliticaPrivacidad: false,
     });
-
     setFieldValidation({});
     setSubmitError(null);
     onOpenChange(false);
@@ -430,8 +309,6 @@ const UserCreateForm = ({ open, onOpenChange, onUserCreated }: UserCreateFormPro
                 )}
               </div>
 
-
-
               {/* Correo */}
               <div className="space-y-2">
                 <Label htmlFor="correo">Correo Electrónico *</Label>
@@ -457,7 +334,6 @@ const UserCreateForm = ({ open, onOpenChange, onUserCreated }: UserCreateFormPro
                 {fieldValidation.correo?.error && (
                   <p className="text-sm text-red-500">{fieldValidation.correo.error}</p>
                 )}
-                {/* Mensaje de beneficio DUOC detectado */}
                 {duocBenefitDetected && (
                   <div className="p-2 bg-green-50 border border-green-200 rounded-md">
                     <p className="text-sm text-green-700 flex items-center gap-2">
@@ -545,6 +421,35 @@ const UserCreateForm = ({ open, onOpenChange, onUserCreated }: UserCreateFormPro
                 {fieldValidation.telefono?.error && (
                   <p className="text-sm text-red-500">{fieldValidation.telefono.error}</p>
                 )}
+                <p className="text-xs text-muted-foreground">Formato: +569 seguido de 8 dígitos</p>
+              </div>
+
+              {/* Tipo */}
+              <div className="space-y-2">
+                <Label htmlFor="tipo">Tipo de Usuario *</Label>
+                <Select value={formData.tipo} onValueChange={(value) => updateField('tipo', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="normal">Normal</SelectItem>
+                    <SelectItem value="duoc">DUOC UC</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Rol */}
+              <div className="space-y-2">
+                <Label htmlFor="rol">Rol *</Label>
+                <Select value={formData.rol} onValueChange={(value) => updateField('rol', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="user">Usuario</SelectItem>
+                    <SelectItem value="admin">Administrador</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>
@@ -557,24 +462,12 @@ const UserCreateForm = ({ open, onOpenChange, onUserCreated }: UserCreateFormPro
               {/* Calle */}
               <div className="space-y-2">
                 <Label htmlFor="calle">Calle *</Label>
-                <div className="relative">
-                  <Input
-                    id="calle"
-                    value={formData.calle}
-                    onChange={(e) => updateField('calle', e.target.value)}
-                    placeholder="Ej: Avenida Providencia"
-                    className={fieldValidation.calle?.isValid === false ? "border-red-500" : fieldValidation.calle?.isValid === true ? "border-green-500" : ""}
-                  />
-                  {fieldValidation.calle && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      {fieldValidation.calle.isValid ? (
-                        <CheckCircle className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <AlertCircle className="w-4 h-4 text-red-500" />
-                      )}
-                    </div>
-                  )}
-                </div>
+                <Input
+                  id="calle"
+                  value={formData.calle}
+                  onChange={(e) => updateField('calle', e.target.value)}
+                  placeholder="Ej: Avenida Providencia"
+                />
                 {fieldValidation.calle?.error && (
                   <p className="text-sm text-red-500">{fieldValidation.calle.error}</p>
                 )}
@@ -583,24 +476,12 @@ const UserCreateForm = ({ open, onOpenChange, onUserCreated }: UserCreateFormPro
               {/* Número */}
               <div className="space-y-2">
                 <Label htmlFor="numero">Número *</Label>
-                <div className="relative">
-                  <Input
-                    id="numero"
-                    value={formData.numero}
-                    onChange={(e) => updateField('numero', e.target.value)}
-                    placeholder="123"
-                    className={fieldValidation.numero?.isValid === false ? "border-red-500" : fieldValidation.numero?.isValid === true ? "border-green-500" : ""}
-                  />
-                  {fieldValidation.numero && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      {fieldValidation.numero.isValid ? (
-                        <CheckCircle className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <AlertCircle className="w-4 h-4 text-red-500" />
-                      )}
-                    </div>
-                  )}
-                </div>
+                <Input
+                  id="numero"
+                  value={formData.numero}
+                  onChange={(e) => updateField('numero', e.target.value)}
+                  placeholder="123"
+                />
                 {fieldValidation.numero?.error && (
                   <p className="text-sm text-red-500">{fieldValidation.numero.error}</p>
                 )}
@@ -621,7 +502,7 @@ const UserCreateForm = ({ open, onOpenChange, onUserCreated }: UserCreateFormPro
               <div className="space-y-2">
                 <Label htmlFor="region">Región *</Label>
                 <Select value={formData.region} onValueChange={(value) => updateField('region', value)}>
-                  <SelectTrigger className={fieldValidation.region?.isValid === false ? "border-red-500" : fieldValidation.region?.isValid === true ? "border-green-500" : ""}>
+                  <SelectTrigger>
                     <SelectValue placeholder="Seleccione una región" />
                   </SelectTrigger>
                   <SelectContent>
@@ -637,114 +518,21 @@ const UserCreateForm = ({ open, onOpenChange, onUserCreated }: UserCreateFormPro
                 )}
               </div>
 
-              {/* Comuna */}
-              <div className="space-y-2">
-                <Label htmlFor="comuna">Comuna *</Label>
-                <div className="relative">
-                  <Input
-                    id="comuna"
-                    value={formData.comuna}
-                    onChange={(e) => updateField('comuna', e.target.value)}
-                    placeholder="Ej: Santiago"
-                    className={fieldValidation.comuna?.isValid === false ? "border-red-500" : fieldValidation.comuna?.isValid === true ? "border-green-500" : ""}
-                  />
-                  {fieldValidation.comuna && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      {fieldValidation.comuna.isValid ? (
-                        <CheckCircle className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <AlertCircle className="w-4 h-4 text-red-500" />
-                      )}
-                    </div>
-                  )}
-                </div>
-                {fieldValidation.comuna?.error && (
-                  <p className="text-sm text-red-500">{fieldValidation.comuna.error}</p>
-                )}
-              </div>
+
 
               {/* Ciudad */}
               <div className="space-y-2">
                 <Label htmlFor="ciudad">Ciudad *</Label>
-                <Select value={formData.ciudad} onValueChange={(value) => updateField('ciudad', value)}>
-                  <SelectTrigger className={fieldValidation.ciudad?.isValid === false ? "border-red-500" : fieldValidation.ciudad?.isValid === true ? "border-green-500" : ""}>
-                    <SelectValue placeholder="Seleccione una ciudad" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {formData.region && getCitiesForRegion(formData.region).map((city) => (
-                      <SelectItem key={city} value={city}>
-                        {city}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Input
+                  id="ciudad"
+                  value={formData.ciudad}
+                  onChange={(e) => updateField('ciudad', e.target.value)}
+                  placeholder="Ej: Santiago"
+                />
                 {fieldValidation.ciudad?.error && (
                   <p className="text-sm text-red-500">{fieldValidation.ciudad.error}</p>
                 )}
               </div>
-
-              {/* Código Postal */}
-              <div className="space-y-2">
-                <Label htmlFor="codigoPostal">Código Postal *</Label>
-                <div className="relative">
-                  <Input
-                    id="codigoPostal"
-                    value={formData.codigoPostal}
-                    onChange={(e) => updateField('codigoPostal', e.target.value)}
-                    placeholder="7500000"
-                    className={fieldValidation.codigoPostal?.isValid === false ? "border-red-500" : fieldValidation.codigoPostal?.isValid === true ? "border-green-500" : ""}
-                  />
-                  {fieldValidation.codigoPostal && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      {fieldValidation.codigoPostal.isValid ? (
-                        <CheckCircle className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <AlertCircle className="w-4 h-4 text-red-500" />
-                      )}
-                    </div>
-                  )}
-                </div>
-                {fieldValidation.codigoPostal?.error && (
-                  <p className="text-sm text-red-500">{fieldValidation.codigoPostal.error}</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Preferencias */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Preferencias</h3>
-
-            {/* Newsletter */}
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="newsletter"
-                checked={formData.newsletter}
-                onCheckedChange={(checked) => updateField('newsletter', checked)}
-              />
-              <Label htmlFor="newsletter">Suscribirse al newsletter</Label>
-            </div>
-
-            {/* Intereses */}
-            <div className="space-y-2">
-              <Label>Intereses (opcional)</Label>
-              <div className="flex flex-wrap gap-2">
-                {AVAILABLE_INTERESTS.map((interest) => (
-                  <Badge
-                    key={interest}
-                    variant={formData.intereses.includes(interest) ? "default" : "outline"}
-                    className="cursor-pointer hover:bg-primary/80"
-                    onClick={() => toggleInterest(interest)}
-                  >
-                    {interest}
-                  </Badge>
-                ))}
-              </div>
-              {formData.intereses.length > 0 && (
-                <p className="text-sm text-muted-foreground">
-                  Intereses seleccionados: {formData.intereses.join(", ")}
-                </p>
-              )}
             </div>
           </div>
 
@@ -800,15 +588,12 @@ const UserCreateForm = ({ open, onOpenChange, onUserCreated }: UserCreateFormPro
               className="min-w-[120px]"
             >
               {isSubmitting ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
                   Creando...
-                </>
+                </div>
               ) : (
-                <>
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  Crear Usuario
-                </>
+                "Crear Usuario"
               )}
             </Button>
           </div>

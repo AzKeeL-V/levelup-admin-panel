@@ -18,12 +18,12 @@ public class BlogService {
     }
 
     public Blog getBlogById(Long id) {
-        return blogRepository.findById(id)
+        return blogRepository.findById(java.util.Objects.requireNonNull(id))
                 .orElseThrow(() -> new RuntimeException("Blog no encontrado"));
     }
 
     public Blog createBlog(Blog blog) {
-        return blogRepository.save(blog);
+        return blogRepository.save(java.util.Objects.requireNonNull(blog));
     }
 
     public Blog updateBlog(Long id, Blog blogDetails) {
@@ -34,11 +34,22 @@ public class BlogService {
         blog.setImagen(blogDetails.getImagen());
         blog.setTipo(blogDetails.getTipo());
         blog.setEtiquetas(blogDetails.getEtiquetas());
-        // Update other fields as needed
+        blog.setFecha(blogDetails.getFecha());
+        blog.setPuntos(blogDetails.getPuntos());
+        blog.setEstado(blogDetails.getEstado());
+        blog.setVideoUrl(blogDetails.getVideoUrl());
+        blog.setAutor(blogDetails.getAutor());
+        blog.setTiempoLectura(blogDetails.getTiempoLectura());
+        blog.setCategoria(blogDetails.getCategoria());
+        blog.setDireccion(blogDetails.getDireccion());
+        blog.setHoraInicio(blogDetails.getHoraInicio());
+        blog.setHoraFin(blogDetails.getHoraFin());
+        blog.setUbicacionUrl(blogDetails.getUbicacionUrl());
+
         return blogRepository.save(blog);
     }
 
     public void deleteBlog(Long id) {
-        blogRepository.deleteById(id);
+        blogRepository.deleteById(java.util.Objects.requireNonNull(id));
     }
 }

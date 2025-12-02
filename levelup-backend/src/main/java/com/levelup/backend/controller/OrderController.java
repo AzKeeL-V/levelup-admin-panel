@@ -23,6 +23,11 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getUserOrders(email));
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<List<Order>> getAllOrders() {
+        return ResponseEntity.ok(orderService.getAllOrders());
+    }
+
     @PostMapping
     public ResponseEntity<Order> createOrder(@RequestBody CreateOrderRequest request, Authentication authentication) {
         String email = authentication.getName();
@@ -30,6 +35,23 @@ public class OrderController {
                 email,
                 request.getItems(),
                 request.getDireccionEnvio(),
-                request.getMetodoPago()));
+                request.getMetodoPago(),
+                request.getCreadoPor(),
+                request.getAdminId(),
+                request.getAdminNombre(),
+                request.getSubtotal(),
+                request.getDescuentoDuoc(),
+                request.getDescuentoPuntos(),
+                request.getTotal(),
+                request.getPuntosUsados(),
+                request.getPuntosGanados(),
+                request.getNotas()));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Order> updateOrder(@PathVariable Long id, @RequestBody Order orderUpdates) {
+        System.out.println("OrderController: Received update request for order ID: " + id);
+        System.out.println("OrderController: Updates: " + orderUpdates);
+        return ResponseEntity.ok(orderService.updateOrder(id, orderUpdates));
     }
 }

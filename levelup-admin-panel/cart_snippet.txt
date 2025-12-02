@@ -1,0 +1,43 @@
+        // Check if initial quantity exceeds stock
+        if (quantity > product.stock) {
+          toast.error(`No puedes agregar más de ${product.stock} unidades de este producto.`);
+          return prevCart;
+        }
+
+        // Determine purchase method based on product properties
+        // Logic: If product has precio > 0, it's purchased with money
+        //        If product has puntos > 0 AND canjeable = true, it's purchased with points
+        //        For now, we default to 'money' for regular products
+        const purchaseMethod: 'money' | 'points' = 
+          (product.canjeable && product.puntos && product.puntos > 0) ? 'points' : 'money';
+
+        console.log(`[CartContext] Adding product: ${product.nombre}`);
+        console.log(`[CartContext] - Price: ${product.precio}, Points: ${product.puntos}, Canjeable: ${product.canjeable}`);
+        console.log(`[CartContext] - Determined purchaseMethod: ${purchaseMethod}`);
+
+        // Add new item
+        const newItem: CartItem = {
+          id: `${product.codigo}_${Date.now()}`,
+          productId: product.codigo,
+          productName: product.nombre,
+          productImage: product.imagen,
+          quantity,
+          unitPrice: product.precio,
+          totalPrice: purchaseMethod === 'money' ? quantity * product.precio : 0,
+          puntosGanados: purchaseMethod === 'money' ? product.puntos : undefined,
+          purchaseMethod, // NEW: Set purchase method
+          puntosRequeridos: purchaseMethod === 'points' ? product.puntos : undefined,
+          canjeable: product.canjeable,
+        };
+        newItems = [...prevCart.items, newItem];
+        
+        const methodText = purchaseMethod === 'money' ? 'compra' : 'canje';
+        toast.success(`Producto añadido al carrito (${methodText})`);
+      }
+
+      const totals = calculateTotals(newItems);
+
+      return {
+        items: newItems,
+        ...totals,
+      };

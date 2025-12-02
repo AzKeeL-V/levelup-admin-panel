@@ -57,8 +57,34 @@ export class ReviewRepository {
   }
 
   static async findByProductId(productId: string): Promise<Review[]> {
-    const reviews = await this.findAll();
-    return reviews.filter(review => review.productId === productId && review.aprobado);
+    try {
+      // Intentar obtener del backend
+      const response = await axiosInstance.get(`/reviews/product/codigo/${productId}`);
+
+      // Mapear respuesta del backend al formato del frontend
+      return response.data.map((backendReview: any) => ({
+        id: String(backendReview.id),
+        productId: backendReview.product?.codigo || productId,
+        userId: String(backendReview.user?.id || ""),
+        userName: backendReview.user?.nombre || "Usuario",
+        userEmail: backendReview.user?.email || "",
+        rating: backendReview.rating,
+        title: backendReview.title,
+        comment: backendReview.comment,
+        fechaCreacion: backendReview.fechaCreacion,
+        aprobado: backendReview.aprobado,
+        util: backendReview.util,
+        noUtil: backendReview.noUtil,
+        verified: backendReview.verified,
+        imagenes: backendReview.imagenes || []
+      }));
+    } catch (error) {
+      console.warn("Backend reviews not available, falling back to local/mock:", error);
+
+      // Fallback a lógica local
+      const reviews = await this.findAll();
+      return reviews.filter(review => review.productId === productId && review.aprobado);
+    }
   }
 
   static async findByUserId(userId: string): Promise<Review[]> {
@@ -67,23 +93,54 @@ export class ReviewRepository {
   }
 
   static async create(review: Omit<Review, "id" | "fechaCreacion">): Promise<Review> {
-    const reviews = await this.findAll();
-    const newReview: Review = {
-      ...review,
-      id: `review_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      fechaCreacion: new Date().toISOString(),
-      aprobado: false, // Requiere moderación
-      util: 0,
-      noUtil: 0
-    };
+    try {
+      // Intentar crear en backend
+      const response = await axiosInstance.post(`/reviews/product/codigo/${review.productId}`, {
+        rating: review.rating,
+        title: review.title,
+        comment: review.comment,
+        imagenes: review.imagenes
+      });
 
-    reviews.push(newReview);
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(reviews));
+      const backendReview = response.data;
+      return {
+        id: String(backendReview.id),
+        productId: backendReview.product?.codigo || review.productId,
+        userId: String(backendReview.user?.id || review.userId),
+        userName: backendReview.user?.nombre || review.userName,
+        userEmail: backendReview.user?.email || review.userEmail,
+        rating: backendReview.rating,
+        title: backendReview.title,
+        comment: backendReview.comment,
+        fechaCreacion: backendReview.fechaCreacion,
+        aprobado: backendReview.aprobado,
+        util: backendReview.util,
+        noUtil: backendReview.noUtil,
+        verified: backendReview.verified,
+        imagenes: backendReview.imagenes || []
+      };
+    } catch (error) {
+      console.warn("Backend create review failed, falling back to local:", error);
 
-    // Actualizar estadísticas
-    await this.updateProductStats(review.productId);
+      // Fallback local
+      const reviews = await this.findAll();
+      const newReview: Review = {
+        ...review,
+        id: `review_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        fechaCreacion: new Date().toISOString(),
+        aprobado: false, // Requiere moderación
+        util: 0,
+        noUtil: 0
+      };
 
-    return newReview;
+      reviews.push(newReview);
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(reviews));
+
+      // Actualizar estadísticas
+      await this.updateProductStats(review.productId);
+
+      return newReview;
+    }
   }
 
   static async update(id: string, reviewData: Partial<Review>): Promise<void> {

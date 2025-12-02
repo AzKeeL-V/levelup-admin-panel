@@ -27,11 +27,29 @@ public class ReviewService {
         return reviewRepository.findByProductId(productId);
     }
 
+    public List<Review> getProductReviewsByCodigo(String productCodigo) {
+        return reviewRepository.findByProductCodigo(productCodigo);
+    }
+
     public Review createReview(String email, Long productId, Review review) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        Product product = productRepository.findById(productId)
+        Product product = productRepository.findById(java.util.Objects.requireNonNull(productId))
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+
+        review.setUser(user);
+        review.setProduct(product);
+        review.setAprobado(true); // Auto-approve for now, or false if moderation needed
+
+        return reviewRepository.save(review);
+    }
+
+    public Review createReviewByCodigo(String email, String productCodigo, Review review) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        Product product = productRepository.findByCodigo(productCodigo)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
         review.setUser(user);

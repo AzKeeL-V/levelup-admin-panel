@@ -19,14 +19,14 @@ public class ProductService {
 
     public Product getProductById(Long id) {
 
-        Product product = productRepository.findById(id)
+        Product product = productRepository.findById(java.util.Objects.requireNonNull(id))
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
         return product;
     }
 
     public Product createProduct(Product product) {
 
-        Product savedProduct = productRepository.save(product);
+        Product savedProduct = productRepository.save(java.util.Objects.requireNonNull(product));
         return savedProduct;
     }
 

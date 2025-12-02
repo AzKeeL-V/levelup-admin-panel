@@ -16,6 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "reviews")
+@com.fasterxml.jackson.annotation.JsonIdentityInfo(generator = com.fasterxml.jackson.annotation.ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Review {
 
     @Id
@@ -23,7 +24,7 @@ public class Review {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
+    @JoinColumn(name = "product_codigo", referencedColumnName = "codigo", nullable = false)
     private Product product;
 
     @ManyToOne

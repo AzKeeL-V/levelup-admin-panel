@@ -29,7 +29,7 @@ export class UserRepository {
           email: true,
           sms: false,
         },
-        newsletter: false,
+
       },
       {
         id: "1",
@@ -47,8 +47,8 @@ export class UserRepository {
           apartamento: "4B",
           ciudad: "Santiago",
           region: "Metropolitana",
-          codigoPostal: "7500000",
-          pais: "Chile",
+
+
         }],
         metodoPagoPreferido: "tarjeta",
         metodosPago: [
@@ -67,7 +67,7 @@ export class UserRepository {
           email: true,
           sms: true,
         },
-        newsletter: true,
+
         intereses: ["Gaming", "Tecnología", "Deportes"],
         aceptaTerminos: true,
         aceptaPoliticaPrivacidad: true,
@@ -93,15 +93,14 @@ export class UserRepository {
           apartamento: null,
           ciudad: "Santiago",
           region: "Metropolitana",
-          codigoPostal: "7550000",
-          pais: "Chile",
+
         }],
         metodoPagoPreferido: "transferencia",
         preferenciasComunicacion: {
           email: true,
           sms: false,
         },
-        newsletter: false,
+
         intereses: ["Libros", "Música"],
         aceptaTerminos: true,
         aceptaPoliticaPrivacidad: true,
@@ -127,15 +126,14 @@ export class UserRepository {
           apartamento: "12A",
           ciudad: "Santiago",
           region: "Metropolitana",
-          codigoPostal: "8240000",
-          pais: "Chile",
+
         }],
         metodoPagoPreferido: "efectivo",
         preferenciasComunicacion: {
           email: false,
           sms: true,
         },
-        newsletter: true,
+
         intereses: ["Gaming", "Películas"],
         aceptaTerminos: true,
         aceptaPoliticaPrivacidad: true,
@@ -160,14 +158,13 @@ export class UserRepository {
           numero: "123",
           ciudad: "Santiago",
           region: "Metropolitana",
-          codigoPostal: "12345",
-          pais: "Chile",
+
         }],
         preferenciasComunicacion: {
           email: true,
           sms: false,
         },
-        newsletter: false,
+
         intereses: ["Arte", "Viajes"],
         aceptaTerminos: true,
         aceptaPoliticaPrivacidad: true,
@@ -192,15 +189,13 @@ export class UserRepository {
           numero: "321",
           ciudad: "Santiago",
           region: "Metropolitana",
-          codigoPostal: "7630000",
-          pais: "Chile",
+
         }],
         metodoPagoPreferido: "paypal",
         preferenciasComunicacion: {
           email: true,
           sms: true,
         },
-        newsletter: true,
         intereses: ["Tecnología", "Gaming", "Deportes"],
         aceptaTerminos: true,
         aceptaPoliticaPrivacidad: true,
@@ -285,20 +280,63 @@ export class UserRepository {
     }
   }
 
+  private static mapBackendUser(u: any): User {
+    console.log('UserRepository.mapBackendUser: Raw backend data:', u);
+    console.log('UserRepository.mapBackendUser: direcciones from backend:', u.direcciones);
+    console.log('UserRepository.mapBackendUser: metodosPago from backend:', u.metodosPago);
+
+    const mappedUser = {
+      id: u.id?.toString() || "",
+      nombre: u.nombre || "",
+      correo: u.email || u.correo || "",
+      contraseña: "", // Never send password to frontend
+      rut: u.rut || "",
+      tipo: u.tipo || "normal",
+      puntos: u.puntos || 0,
+      nivel: u.nivel || "bronce",
+      telefono: u.telefono || "",
+      direcciones: u.direcciones || [],
+      intereses: u.intereses || [],
+      aceptaTerminos: u.aceptaTerminos !== undefined ? u.aceptaTerminos : true,
+      aceptaPoliticaPrivacidad: u.aceptaPoliticaPrivacidad !== undefined ? u.aceptaPoliticaPrivacidad : true,
+      captchaVerificado: u.captchaVerificado !== undefined ? u.captchaVerificado : true,
+      fechaRegistro: u.fechaRegistro || new Date().toISOString(),
+      activo: u.activo !== undefined ? u.activo : true,
+      codigoReferido: u.codigoReferido || "",
+      rol: u.role ? u.role.toLowerCase() : "user",
+      referidoPor: u.referidoPor || null,
+      preferenciasComunicacion: u.preferenciasComunicacion || { email: true, sms: false },
+      metodoPagoPreferido: u.metodoPagoPreferido,
+      metodosPago: u.metodosPago,
+      ultimoAcceso: u.ultimoAcceso
+    };
+
+    console.log('UserRepository.mapBackendUser: MAPPED USER:', mappedUser);
+    console.log('UserRepository.mapBackendUser: MAPPED direcciones:', mappedUser.direcciones);
+    console.log('UserRepository.mapBackendUser: MAPPED metodosPago:', mappedUser.metodosPago);
+
+    return mappedUser;
+  }
+
   static async findAll(): Promise<User[]> {
     // Primero intenta obtener los usuarios desde el backend con axios
     try {
+      console.log("UserRepository.findAll: Fetching from backend...");
       const response = await axiosInstance.get('/users');
+      console.log("UserRepository.findAll: Backend response:", response.data);
+
       // Map backend response to frontend User type
-      return response.data.map((u: any) => ({
-        ...u,
-        rol: u.role ? u.role.toLowerCase() : "user",
-        // Map other fields if necessary
-      }));
+      const mappedUsers = response.data.map((u: any) => this.mapBackendUser(u));
+
+      console.log("UserRepository.findAll: Mapped users:", mappedUsers.length);
+      return mappedUsers;
     } catch (err) {
+      console.error("UserRepository.findAll: Error fetching from backend:", err);
       // Si falla axios (no hay backend), usa localStorage o JSON local
+      console.log("UserRepository.findAll: Falling back to localStorage...");
     }
-    console.log("UserRepository: findAll called");
+
+    console.log("UserRepository: findAll called (localStorage fallback)");
     // Simula delay de red
     await new Promise(resolve => setTimeout(resolve, 300));
     const users = await this.getUsers();
@@ -308,9 +346,16 @@ export class UserRepository {
   }
 
   static async findById(id: string): Promise<User | null> {
-    await new Promise(resolve => setTimeout(resolve, 200));
-    const users = await this.getUsers();
-    return users.find(user => user.id === id) || null;
+    try {
+      console.log(`UserRepository.findById: Fetching user ${id} from backend...`);
+      const response = await axiosInstance.get(`/users/${id}`);
+      return this.mapBackendUser(response.data);
+    } catch (error) {
+      console.error(`UserRepository.findById: Error fetching user ${id}:`, error);
+      // Fallback to local data
+      const users = await this.getUsers();
+      return users.find(user => user.id === id) || null;
+    }
   }
 
   // Función para validar formato de RUT chileno
@@ -350,7 +395,7 @@ export class UserRepository {
     try {
       console.log("UserRepository.create: Creating user via API:", user.correo);
 
-      // Validar formato de RUT y Email antes de enviar (opcional, el backend también valida)
+      // Validar formato de RUT y Email antes de enviar
       if (user.rut && !this.validateRut(user.rut)) {
         throw new Error("El RUT ingresado no es válido");
       }
@@ -358,52 +403,28 @@ export class UserRepository {
         throw new Error("El correo electrónico no tiene un formato válido");
       }
 
-      // El backend espera un objeto User. 
-      // Si usamos el endpoint de registro público (/auth/register), usamos AuthService.register.
-      // Pero si esto es creación desde admin, deberíamos usar POST /api/users (si existiera create en UserController).
-      // UserController (step 599) NO tiene create method!
-      // UserController tiene getAll, getById, update, delete, stats.
-      // NO tiene create.
-      // Por lo tanto, para crear usuarios, debemos usar AuthService.register o agregar create a UserController.
-      // Si es un admin creando un usuario, probablemente quiera setear roles, puntos, etc.
-      // AuthService.register crea usuarios con rol USER y defaults.
-
-      // Si el requerimiento es "integrar eso", y el usuario pidió "elimincaciones logicas", 
-      // la creación de usuarios desde admin panel podría requerir un endpoint específico.
-      // PERO, por ahora, usaremos AuthService.register como fallback o asumiremos que se usa el registro público.
-      // Sin embargo, si el admin crea un usuario, debería poder hacerlo.
-
-      // Voy a usar /auth/register por ahora, ya que UserController no tiene create.
-      // O mejor, agrego create a UserController?
-      // El plan decía "UserService... Métodos: getAllUsers, getUserById, updateUser, deleteUser...".
-      // NO mencioné create en el plan para UserService/Controller.
-      // Así que asumiré que la creación se hace vía registro público o no es el foco crítico ahora (el foco era eliminación lógica).
-      // PERO, UserRepository.create existe en el frontend.
-
-      // Voy a usar axiosInstance.post('/auth/register', ...) adaptando los datos.
-      // RegisterRequest tiene: nombre, email, password, telefono, rut, codigoReferido.
-      // User tiene más campos.
-
-      const registerRequest = {
+      // Map frontend User type to backend format
+      const dataToSend: any = {
         nombre: user.nombre,
         email: user.correo,
         password: user.contraseña,
         telefono: user.telefono,
         rut: user.rut,
-        codigoReferido: user.codigoReferido
+        tipo: user.tipo,
+        puntos: user.puntos,
+        nivel: user.nivel,
+        activo: user.activo !== undefined ? user.activo : true,
       };
 
-      const response = await axiosInstance.post('/auth/register', registerRequest);
-      // La respuesta es AuthResponse, no User completo.
-      // Pero necesitamos devolver User.
-      // Construimos un User parcial desde la respuesta.
+      // Map role if provided
+      if (user.rol) {
+        dataToSend.role = user.rol.toUpperCase();
+      }
 
-      const authResponse = response.data;
-      return {
-        ...user,
-        id: authResponse.id.toString(),
-        // otros campos defaults
-      } as User;
+      const response = await axiosInstance.post('/users', dataToSend);
+
+      // Map response back to frontend User type
+      return this.mapBackendUser(response.data);
 
     } catch (error: any) {
       console.error("Error creating user:", error);
@@ -416,19 +437,22 @@ export class UserRepository {
       // Map frontend User type to backend format if necessary
       // Backend expects "role" instead of "rol"
       const dataToSend: any = { ...userData };
+
       if (userData.rol) {
         dataToSend.role = userData.rol.toUpperCase();
         delete dataToSend.rol;
       }
 
+      // Map correo to email if present
+      if (userData.correo) {
+        dataToSend.email = userData.correo;
+        delete dataToSend.correo;
+      }
+
       const response = await axiosInstance.put(`/users/${id}`, dataToSend);
 
       // Map response back to frontend User type
-      const u = response.data;
-      return {
-        ...u,
-        rol: u.role ? u.role.toLowerCase() : "user",
-      };
+      return this.mapBackendUser(response.data);
     } catch (error: any) {
       console.error("Error updating user:", error);
       throw new Error(error.response?.data?.message || "Error al actualizar usuario");

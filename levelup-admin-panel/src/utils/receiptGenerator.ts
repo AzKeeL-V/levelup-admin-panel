@@ -2,6 +2,7 @@
  * Utilidad para generar y descargar boletas en PDF
  * Usa dynamic imports para evitar problemas de carga con jspdf en Vite
  */
+import { toast } from "sonner";
 import type { Order, OrderItem } from "@/types";
 
 export const generateAndDownloadReceiptPDF = async (
@@ -20,17 +21,23 @@ export const generateAndDownloadReceiptPDF = async (
 
     if (!jsPDF) {
       console.error("Error: jsPDF module not loaded correctly");
-      alert("Error al cargar el generador de PDF.");
+      toast.error("Error al cargar el generador de PDF.");
       return;
     }
 
     const doc = new jsPDF();
 
     // --- Constantes de Diseño ---
-    const margin = 15;
     const pageWidth = doc.internal.pageSize.width;
-    const contentWidth = pageWidth - (margin * 2);
-    let currentY = 20;
+    const pageHeight = doc.internal.pageSize.height;
+    const margin = 15;
+    let currentY = 0;
+
+    // Colores corporativos
+    const primaryColor = [79, 70, 229]; // Indigo-600 #4f46e5
+    const secondaryColor = [30, 41, 59]; // Slate-800 #1e293b
+    const lightGray = [241, 245, 249]; // Slate-100 #f1f5f9
+    const darkGray = [51, 65, 85]; // Slate-700 #334155
 
     // --- Helper Functions ---
     const formatPrice = (price: number) => {
@@ -50,64 +57,79 @@ export const generateAndDownloadReceiptPDF = async (
       });
     };
 
-    // --- 1. Header (Empresa) ---
-    doc.setFontSize(18);
-    doc.setTextColor(0, 0, 0);
+    // --- 1. Header Strip ---
+    // Fondo del encabezado
+    doc.setFillColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
+    doc.rect(0, 0, pageWidth, 40, 'F');
+
+    currentY = 25;
+
+    // Título Empresa (Izquierda)
+    doc.setFontSize(24);
+    doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
+    doc.text("LEVEL UP", margin, currentY);
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text("Tu tienda gamer de confianza", margin, currentY + 6);
+
+    // Título Documento (Derecha)
+    doc.setFontSize(16);
+    doc.text("BOLETA ELECTRÓNICA", pageWidth - margin, currentY - 5, { align: "right" });
+
+    doc.setFontSize(10);
+    doc.text(`N° Ticket: ${order.numeroOrden}`, pageWidth - margin, currentY + 2, { align: "right" });
+    doc.text(`Fecha: ${formatDate(order.fechaCreacion)}`, pageWidth - margin, currentY + 7, { align: "right" });
+
+    currentY = 55;
+
+    // --- 2. Información Empresa y Cliente (2 Columnas) ---
+
+    // Columna Izquierda: Emisor
+    doc.setFontSize(10);
+    doc.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
+    doc.setFont("helvetica", "bold");
+    doc.text("EMISOR", margin, currentY);
+
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+    doc.setFontSize(9);
+    currentY += 5;
     doc.text("LEVEL UP SpA", margin, currentY);
+    doc.text("RUT: 76.123.456-7", margin, currentY + 5);
+    doc.text("Av. Gamer 123, Santiago, Chile", margin, currentY + 10);
+    doc.text("contacto@levelup.cl", margin, currentY + 15);
+    doc.text("www.levelup.cl", margin, currentY + 20);
 
-    doc.setFontSize(14);
-    doc.setTextColor(100, 100, 100);
-    doc.text("BOLETA ELECTRÓNICA", pageWidth - margin, currentY, { align: "right" });
+    // Columna Derecha: Cliente (en caja)
+    const boxY = 50;
+    const boxHeight = 35;
+    const boxWidth = pageWidth / 2 - margin;
+    const boxX = pageWidth / 2;
 
-    currentY += 8;
+    doc.setFillColor(lightGray[0], lightGray[1], lightGray[2]);
+    doc.roundedRect(boxX, boxY, boxWidth, boxHeight, 3, 3, 'F');
 
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(80, 80, 80);
-    doc.text("Av. Gamer 123, Santiago, Chile", margin, currentY);
-    doc.text("RUT: 76.123.456-7", pageWidth - margin, currentY, { align: "right" });
+    let clientY = boxY + 10;
+    const clientMargin = boxX + 5;
 
-    currentY += 5;
-    doc.text("Email: adminlevelup@.cl", margin, currentY);
-    doc.text(`N° Ticket: ${order.numeroOrden}`, pageWidth - margin, currentY, { align: "right" });
-
-    currentY += 5;
-    doc.text("Web: www.levelup.cl", margin, currentY);
-    doc.text(`Fecha Emisión: ${formatDate(order.fechaCreacion)}`, pageWidth - margin, currentY, { align: "right" });
-
-    currentY += 10;
-    doc.setDrawColor(200, 200, 200);
-    doc.line(margin, currentY, pageWidth - margin, currentY);
-    currentY += 10;
-
-    // --- 2. Información del Cliente ---
-    doc.setFontSize(11);
+    doc.setFontSize(10);
+    doc.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(0, 0, 0);
-    doc.text("Información del Cliente", margin, currentY);
-    currentY += 7;
+    doc.text("CLIENTE", clientMargin, clientY);
 
-    doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
+    doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+    doc.setFontSize(9);
+    clientY += 6;
 
-    // Izquierda
-    doc.text(`Nombre: ${order.userName}`, margin, currentY);
-    doc.text(`RUT: ${order.userRut || 'N/A'}`, pageWidth / 2 + 10, currentY); // Placeholder for RUT
-    currentY += 5;
+    doc.text(order.userName, clientMargin, clientY);
+    doc.text(order.userRut || "RUT: N/A", clientMargin, clientY + 5);
+    doc.text(order.userEmail, clientMargin, clientY + 10);
+    doc.text(order.direccionEnvio.telefono || "", clientMargin, clientY + 15);
 
-    doc.text(`Email: ${order.userEmail}`, margin, currentY);
-    doc.text(`Teléfono: ${order.direccionEnvio?.telefono || 'N/A'}`, pageWidth / 2 + 10, currentY);
-    currentY += 5;
-
-    const address = order.direccionEnvio;
-    const addressStr = `${address.calle} ${address.numero}, ${address.ciudad}, ${address.region}`;
-    doc.text(`Dirección: ${addressStr}`, margin, currentY);
-    currentY += 5;
-
-    doc.text(`Forma de Entrega: Envío a Domicilio`, margin, currentY);
-    doc.text(`Vendedor: `, pageWidth / 2 + 10, currentY); // Dejar vacío
-    currentY += 10;
+    currentY = 100;
 
     // --- 3. Detalle de Productos (Tabla) ---
     const tableBody = order.items.map((item: OrderItem) => [
@@ -120,99 +142,135 @@ export const generateAndDownloadReceiptPDF = async (
     if (typeof autoTable === 'function') {
       autoTable(doc, {
         startY: currentY,
-        head: [['Cant.', 'Artículo', 'P. Unitario', 'Total']],
+        head: [['Cant.', 'Descripción', 'Precio Unit.', 'Total']],
         body: tableBody,
-        theme: 'plain', // Minimalist theme
+        theme: 'striped',
         headStyles: {
-          fillColor: [240, 240, 240],
-          textColor: [0, 0, 0],
+          fillColor: primaryColor,
+          textColor: [255, 255, 255],
           fontStyle: 'bold',
-          lineWidth: 0.1,
-          lineColor: [200, 200, 200]
+          halign: 'center'
         },
         styles: {
           fontSize: 9,
-          cellPadding: 3,
-          lineColor: [200, 200, 200],
-          lineWidth: { bottom: 0.1 }
+          cellPadding: 4,
+          textColor: darkGray
         },
         columnStyles: {
           0: { cellWidth: 20, halign: 'center' },
           1: { cellWidth: 'auto' },
           2: { cellWidth: 35, halign: 'right' },
           3: { cellWidth: 35, halign: 'right' }
-        }
+        },
+        alternateRowStyles: {
+          fillColor: [248, 250, 252] // Slate-50
+        },
+        margin: { left: margin, right: margin }
       });
     }
 
-    // --- 4. Totales ---
+    // --- 4. Totales y Pago ---
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const finalY = (doc as any).lastAutoTable ? (doc as any).lastAutoTable.finalY + 10 : currentY + 20;
+
+    // Sección Izquierda: Info Pago
+    let paymentY = finalY;
+    doc.setFontSize(10);
+    doc.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
+    doc.setFont("helvetica", "bold");
+    doc.text("INFORMACIÓN DE PAGO", margin, paymentY);
+
+    paymentY += 7;
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+
+    let paymentText = order.metodoPago;
+    if (order.metodoPago === 'credito') paymentText = "Tarjeta de Crédito";
+    else if (order.metodoPago === 'debito') paymentText = "Tarjeta de Débito";
+    else paymentText = order.metodoPago.charAt(0).toUpperCase() + order.metodoPago.slice(1);
+
+    doc.text(`Método: ${paymentText}`, margin, paymentY);
+
+    if (order.metodoPago === 'tarjeta' || order.metodoPago === 'credito' || order.metodoPago === 'debito') {
+      paymentY += 5;
+      doc.text(`Tarjeta: ${order.datosPago?.numeroTarjeta || "****"}`, margin, paymentY);
+      if (order.datosPago?.tipoTarjeta) {
+        paymentY += 5;
+        doc.text(`Tipo: ${order.datosPago.tipoTarjeta}`, margin, paymentY);
+      }
+    }
+
+    paymentY += 5;
+    doc.text("Estado: Pagado", margin, paymentY);
+
+    // Sección Derecha: Totales
     const rightColX = pageWidth - margin - 40;
     const valuesX = pageWidth - margin;
-
-    doc.setFontSize(9);
+    let totalsY = finalY;
 
     // Cálculos
-    // Asumimos que el total incluye IVA. Neto = Total / 1.19
     const total = order.total;
     const neto = Math.round(total / 1.19);
     const iva = total - neto;
 
+    doc.setFontSize(9);
+    doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+
     // Neto
-    doc.text("Neto:", rightColX, finalY, { align: "right" });
-    doc.text(formatPrice(neto), valuesX, finalY, { align: "right" });
+    doc.text("Neto:", rightColX, totalsY, { align: "right" });
+    doc.text(formatPrice(neto), valuesX, totalsY, { align: "right" });
+    totalsY += 6;
 
     // IVA
-    doc.text("IVA (19%):", rightColX, finalY + 5, { align: "right" });
-    doc.text(formatPrice(iva), valuesX, finalY + 5, { align: "right" });
+    doc.text("IVA (19%):", rightColX, totalsY, { align: "right" });
+    doc.text(formatPrice(iva), valuesX, totalsY, { align: "right" });
+    totalsY += 6;
 
     // Descuentos
-    let discountY = finalY + 10;
     if (order.descuentoDuoc > 0) {
-      doc.text("Descuento DUOC:", rightColX, discountY, { align: "right" });
-      doc.text(`-${formatPrice(order.descuentoDuoc)}`, valuesX, discountY, { align: "right" });
-      discountY += 5;
+      doc.setTextColor(22, 163, 74); // Green-600
+      doc.text("Desc. DUOC:", rightColX, totalsY, { align: "right" });
+      doc.text(`-${formatPrice(order.descuentoDuoc)}`, valuesX, totalsY, { align: "right" });
+      totalsY += 6;
     }
     if (order.descuentoPuntos > 0) {
-      doc.text("Descuento Puntos:", rightColX, discountY, { align: "right" });
-      doc.text(`-${formatPrice(order.descuentoPuntos)}`, valuesX, discountY, { align: "right" });
-      discountY += 5;
+      doc.setTextColor(22, 163, 74); // Green-600
+      doc.text("Desc. Puntos:", rightColX, totalsY, { align: "right" });
+      doc.text(`-${formatPrice(order.descuentoPuntos)}`, valuesX, totalsY, { align: "right" });
+      totalsY += 6;
     }
+
+    // Separator Line
+    doc.setDrawColor(200, 200, 200);
+    doc.line(rightColX - 20, totalsY, pageWidth - margin, totalsY);
+    totalsY += 6;
 
     // Total Final
-    doc.setFontSize(11);
+    doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
-    doc.text("TOTAL:", rightColX, discountY + 2, { align: "right" });
-    doc.text(formatPrice(total), valuesX, discountY + 2, { align: "right" });
+    doc.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
+    doc.text("TOTAL:", rightColX, totalsY + 2, { align: "right" });
+    doc.text(formatPrice(total), valuesX, totalsY + 2, { align: "right" });
 
-    // --- 5. Footer / Info Pago ---
-    let footerY = discountY + 15;
+    // --- 5. Footer ---
+    const footerY = pageHeight - 20;
 
-    doc.setFontSize(9);
+    doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+    doc.setLineWidth(0.5);
+    doc.line(margin, footerY - 5, pageWidth - margin, footerY - 5);
+
+    doc.setFontSize(8);
+    doc.setTextColor(100, 100, 100);
     doc.setFont("helvetica", "normal");
-    doc.text("Observaciones: null", margin, footerY);
-    footerY += 5;
-
-    doc.text("Comprobante de Venta", margin, footerY);
-    footerY += 5;
-
-    // Info Tarjeta Mockeada
-    if (order.metodoPago === 'tarjeta') {
-      doc.text("Método de Pago: Tarjeta de Crédito/Débito", margin, footerY);
-      footerY += 5;
-      doc.text("Emisor: Transbank / WebPay", margin, footerY);
-      footerY += 5;
-      doc.text("N° Tarjeta: **** **** **** 1234", margin, footerY);
-    } else {
-      doc.text(`Método de Pago: ${order.metodoPago.toUpperCase()}`, margin, footerY);
-    }
+    doc.text("Gracias por tu compra en Level Up. ¡Que disfrutes tu juego!", pageWidth / 2, footerY, { align: "center" });
+    doc.text("Este documento es una representación impresa de una Boleta Electrónica.", pageWidth / 2, footerY + 5, { align: "center" });
 
     // Guardar
     doc.save(fileName);
 
   } catch (error) {
     console.error("Error generating PDF:", error);
-    alert("Hubo un error al generar el PDF.");
+    toast.error("Hubo un error al generar el PDF.");
   }
 };

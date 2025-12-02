@@ -186,6 +186,10 @@ const Register = () => {
 
 
   const handleDireccionChange = (index: number, field: string, value: string) => {
+    // Si el campo es 'numero', solo permitir dígitos
+    if (field === "numero") {
+      value = value.replace(/\D/g, "");
+    }
     const newDirecciones = [...formData.direcciones];
     newDirecciones[index] = { ...newDirecciones[index], [field]: value };
     setFormData(prev => ({ ...prev, direcciones: newDirecciones }));
@@ -333,11 +337,11 @@ const Register = () => {
           ciudad: d.ciudad,
           region: d.region,
           codigoPostal: undefined,
-          pais: "Chile"
+
         })),
         metodosPago: formData.tarjeta.numero ? [{
           id: Date.now().toString(),
-          tipo: "tarjeta" as const,
+          tipo: (formData.tarjeta.tipo as "credito" | "debito") || "credito",
           esPredeterminado: true,
           tarjeta: {
             numero: formData.tarjeta.numero,
@@ -345,7 +349,7 @@ const Register = () => {
             titular: formData.nombre.trim()
           }
         }] : [],
-        metodoPagoPreferido: formData.tarjeta.numero ? ("tarjeta" as const) : undefined,
+        metodoPagoPreferido: formData.tarjeta.numero ? ((formData.tarjeta.tipo as "credito" | "debito") || "credito") : undefined,
         intereses: [], // Sin intereses
         aceptaTerminos: formData.aceptaTerminos,
         aceptaPoliticaPrivacidad: formData.aceptaPoliticaPrivacidad,
@@ -357,7 +361,7 @@ const Register = () => {
           email: true,
           sms: false
         },
-        newsletter: true
+        fechaRegistro: new Date().toISOString()
       };
 
       // Add user using context
@@ -794,11 +798,8 @@ const Register = () => {
                           <SelectValue placeholder="Selecciona tipo" />
                         </SelectTrigger>
                         <SelectContent className="bg-slate-700 border-slate-600">
-                          <SelectItem value="visa" className="text-white hover:bg-slate-600">Visa</SelectItem>
-                          <SelectItem value="mastercard" className="text-white hover:bg-slate-600">Mastercard</SelectItem>
-                          <SelectItem value="amex" className="text-white hover:bg-slate-600">American Express</SelectItem>
-                          <SelectItem value="diners" className="text-white hover:bg-slate-600">Diners Club</SelectItem>
-                          <SelectItem value="discover" className="text-white hover:bg-slate-600">Discover</SelectItem>
+                          <SelectItem value="credito" className="text-white hover:bg-slate-600">Tarjeta de Crédito</SelectItem>
+                          <SelectItem value="debito" className="text-white hover:bg-slate-600">Tarjeta de Débito</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>

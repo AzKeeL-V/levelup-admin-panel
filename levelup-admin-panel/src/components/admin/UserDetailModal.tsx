@@ -82,16 +82,12 @@ const UserDetailModal = ({ user, open, onOpenChange, isEditMode, isCreateMode = 
     apartamento?: string;
     ciudad: string;
     region: string;
-    codigoPostal?: string;
-    pais?: string;
   }>({
     calle: "",
     numero: "",
     apartamento: "",
     ciudad: "",
-    region: "",
-    codigoPostal: "",
-    pais: "Chile"
+    region: ""
   });
   const [saving, setSaving] = useState(false);
   const [phoneError, setPhoneError] = useState("");
@@ -113,11 +109,9 @@ const UserDetailModal = ({ user, open, onOpenChange, isEditMode, isCreateMode = 
       numero: "",
       apartamento: "",
       ciudad: "",
-      region: "",
-      codigoPostal: "",
-      pais: "Chile"
+      region: ""
     },
-    newsletter: false,
+    preferenciasComunicacion: { email: true, sms: false },
     intereses: [] as string[],
     aceptaTerminos: true,
     aceptaPoliticaPrivacidad: true
@@ -152,9 +146,7 @@ const UserDetailModal = ({ user, open, onOpenChange, isEditMode, isCreateMode = 
         numero: "",
         apartamento: "",
         ciudad: "",
-        region: "",
-        codigoPostal: "",
-        pais: "Chile"
+        region: ""
       });
       setSuccessMessage(""); // Clear success message when opening
     }
@@ -179,7 +171,7 @@ const UserDetailModal = ({ user, open, onOpenChange, isEditMode, isCreateMode = 
   };
 
   const validateAddress = (address: typeof newAddress) => {
-    return address.calle.trim() && address.numero.trim() && address.ciudad.trim() && address.region.trim() && address.codigoPostal.trim();
+    return address.calle.trim() && address.numero.trim() && address.ciudad.trim() && address.region.trim();
   };
 
   const validateRut = (rut: string) => {
@@ -227,6 +219,16 @@ const UserDetailModal = ({ user, open, onOpenChange, isEditMode, isCreateMode = 
       // console.error("Error updating password:", error);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const formatPhoneNumber = (value: string) => {
+    const digits = value.replace(/\D/g, '');
+    if (digits.startsWith('569')) {
+      return '+' + digits.slice(0, 11);
+    } else {
+      const phoneDigits = digits.replace(/^569/, '').slice(0, 8);
+      return '+569' + phoneDigits;
     }
   };
 
@@ -498,9 +500,6 @@ const UserDetailModal = ({ user, open, onOpenChange, isEditMode, isCreateMode = 
                               </p>
                               <p className="text-xs md:text-sm text-muted-foreground">
                                 {user.direcciones[0].ciudad}, {user.direcciones[0].region}
-                              </p>
-                              <p className="text-xs md:text-sm text-muted-foreground">
-                                {user.direcciones[0].pais} - {user.direcciones[0].codigoPostal}
                               </p>
                             </div>
                           ) : (
@@ -1029,24 +1028,7 @@ const UserDetailModal = ({ user, open, onOpenChange, isEditMode, isCreateMode = 
                             onChange={(e) => setNewAddress(prev => ({ ...prev, region: e.target.value }))}
                           />
                         </div>
-                        <div className="grid grid-cols-2 gap-2">
-                          <Input
-                            placeholder="Código Postal"
-                            value={newAddress.codigoPostal}
-                            onChange={(e) => setNewAddress(prev => ({ ...prev, codigoPostal: e.target.value }))}
-                          />
-                          <Select value={newAddress.pais} onValueChange={(value) => setNewAddress(prev => ({ ...prev, pais: value }))}>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Chile">Chile</SelectItem>
-                              <SelectItem value="Argentina">Argentina</SelectItem>
-                              <SelectItem value="Perú">Perú</SelectItem>
-                              <SelectItem value="Colombia">Colombia</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
+
                         <div className="flex gap-2">
                           <Button
                             onClick={handleSaveAddress}
@@ -1128,7 +1110,7 @@ const UserDetailModal = ({ user, open, onOpenChange, isEditMode, isCreateMode = 
           </TabsContent>
         </Tabs>
       </DialogContent>
-    </Dialog>
+    </Dialog >
   );
 };
 

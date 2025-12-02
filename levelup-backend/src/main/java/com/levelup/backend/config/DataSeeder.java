@@ -4,15 +4,25 @@ import com.levelup.backend.entity.Address;
 import com.levelup.backend.entity.Product;
 import com.levelup.backend.entity.Role;
 import com.levelup.backend.entity.User;
+import com.levelup.backend.entity.PaymentMethod;
+import com.levelup.backend.entity.CardDetails;
 import com.levelup.backend.repository.ProductRepository;
 import com.levelup.backend.repository.UserRepository;
+import com.levelup.backend.repository.BlogRepository;
+import com.levelup.backend.entity.Blog;
+import java.time.LocalDate;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
@@ -20,17 +30,32 @@ public class DataSeeder implements CommandLineRunner {
 
         private final ProductRepository productRepository;
         private final UserRepository userRepository;
+        private final BlogRepository blogRepository;
         private final PasswordEncoder passwordEncoder;
+        @NonNull
+        private final PlatformTransactionManager transactionManager;
 
         @Override
         public void run(String... args) throws Exception {
-                seedUsers();
-                seedProducts();
+                try {
+                        new TransactionTemplate(transactionManager).execute(status -> {
+                                seedUsers();
+                                return null;
+                        });
+                        seedProducts();
+                        seedBlogs();
+                } catch (Exception e) {
+                        System.out.println("ERROR SEEDING DATA: " + e.getMessage());
+                        if (e.getCause() != null) {
+                                System.out.println("CAUSE: " + e.getCause().getMessage());
+                        }
+                        e.printStackTrace();
+                }
         }
 
         private void seedUsers() {
-                if (userRepository.count() == 0) {
-                        // Admin user - sin campos de gamificación
+                // Seed Admin
+                if (userRepository.findByEmail("admin@levelup.com").isEmpty()) {
                         User admin = User.builder()
                                         .nombre("Admin User")
                                         .email("admin@levelup.com")
@@ -43,14 +68,15 @@ public class DataSeeder implements CommandLineRunner {
                                                         .nombre("Oficina Central")
                                                         .calle("Admin HQ")
                                                         .numero("123")
-                                                        .ciudad("Santiago")
-                                                        .comuna("Providencia")
-                                                        .region("Metropolitana")
-                                                        .pais("Chile")
-                                                        .build()))
+                                                        .ciudad("Santiago").region("Metropolitana").build()))
                                         .build();
+                        userRepository.save(Objects.requireNonNull(admin));
+                        System.out.println("Admin user seeded");
+                }
 
-                        // Normal user - con campos de gamificación
+                // Seed Normal User
+                User existingUser = userRepository.findByEmail("user@levelup.com").orElse(null);
+                if (existingUser == null) {
                         User user = User.builder()
                                         .nombre("Normal User")
                                         .email("user@levelup.com")
@@ -66,16 +92,72 @@ public class DataSeeder implements CommandLineRunner {
                                                         .nombre("Casa")
                                                         .calle("User Home")
                                                         .numero("456")
-                                                        .ciudad("Valparaíso")
-                                                        .comuna("Valparaíso")
-                                                        .region("Valparaíso")
-                                                        .pais("Chile")
-                                                        .build()))
+                                                        .ciudad("Valparaíso").region("Valparaíso").build()))
                                         .build();
 
-                        Iterable<User> users = List.of(admin, user);
-                        userRepository.saveAll(users);
-                        System.out.println("Users seeded");
+                        // Create payment methods with MASKED card numbers for security
+                        PaymentMethod card = PaymentMethod.builder()
+                                        .tipo("tarjeta")
+                                        .tarjeta(CardDetails.builder()
+                                                        .numero("**** **** **** 1111") // Masked for PCI-DSS compliance
+                                                        .fechaExpiracion("12/25")
+                                                        .titular("Normal User")
+                                                        .build())
+                                        .esPredeterminado(true)
+                                        .build();
+
+                        PaymentMethod paypal = PaymentMethod.builder()
+                                        .tipo("paypal")
+                                        .emailPaypal("user@levelup.com")
+                                        .esPredeterminado(false)
+                                        .build();
+
+                        user.setMetodosPago(new ArrayList<>(List.of(card, paypal)));
+                        userRepository.save(Objects.requireNonNull(user));
+                        System.out.println("Normal user seeded with masked payment methods");
+                } else {
+                        // Update existing user if addresses are missing
+                        if (existingUser.getDirecciones() == null || existingUser.getDirecciones().isEmpty()) {
+                                Address address = Address.builder()
+                                                .nombre("Casa")
+                                                .calle("User Home")
+                                                .numero("456")
+                                                .ciudad("Valparaíso").region("Valparaíso").build();
+
+                                if (existingUser.getDirecciones() == null) {
+                                        existingUser.setDirecciones(new ArrayList<>());
+                                }
+                                existingUser.getDirecciones().add(address);
+                                userRepository.save(Objects.requireNonNull(existingUser));
+                                System.out.println("Normal user updated with default address");
+                        }
+
+                        // Update existing user if payment methods are missing
+                        if (existingUser.getMetodosPago() == null || existingUser.getMetodosPago().isEmpty()) {
+                                PaymentMethod card = PaymentMethod.builder()
+                                                .tipo("tarjeta")
+                                                .tarjeta(CardDetails.builder()
+                                                                .numero("**** **** **** 1111") // Masked for PCI-DSS
+                                                                                               // compliance
+                                                                .fechaExpiracion("12/25")
+                                                                .titular("Normal User")
+                                                                .build())
+                                                .esPredeterminado(true)
+                                                .build();
+
+                                PaymentMethod paypal = PaymentMethod.builder()
+                                                .tipo("paypal")
+                                                .emailPaypal("user@levelup.com")
+                                                .esPredeterminado(false)
+                                                .build();
+
+                                // Modify existing collection instead of replacing it
+                                existingUser.getMetodosPago().clear();
+                                existingUser.getMetodosPago().add(card);
+                                existingUser.getMetodosPago().add(paypal);
+                                userRepository.save(Objects.requireNonNull(existingUser));
+                                System.out.println("Normal user updated with masked payment methods");
+                        }
                 }
         }
 
@@ -93,9 +175,7 @@ public class DataSeeder implements CommandLineRunner {
                                                 .marca("Devir")
                                                 .puntos(3000)
                                                 .activo(true)
-                                                .canjeable(true)
-                                                .origen("tienda")
-                                                .rating(4.8)
+                                                .canjeable(true).rating(4.8)
                                                 .build(),
                                 Product.builder()
                                                 .nombre("Carcassonne")
@@ -109,9 +189,7 @@ public class DataSeeder implements CommandLineRunner {
                                                 .marca("Devir")
                                                 .puntos(2500)
                                                 .activo(true)
-                                                .canjeable(true)
-                                                .origen("tienda")
-                                                .rating(4.7)
+                                                .canjeable(true).rating(4.7)
                                                 .build(),
                                 Product.builder()
                                                 .nombre("Controlador Inalámbrico Xbox Series X")
@@ -125,9 +203,7 @@ public class DataSeeder implements CommandLineRunner {
                                                 .marca("Microsoft")
                                                 .puntos(6000)
                                                 .activo(true)
-                                                .canjeable(false)
-                                                .origen("tienda")
-                                                .rating(4.9)
+                                                .canjeable(false).rating(4.9)
                                                 .build(),
                                 Product.builder()
                                                 .nombre("Auriculares Gamer HyperX Cloud II")
@@ -141,9 +217,7 @@ public class DataSeeder implements CommandLineRunner {
                                                 .marca("HyperX")
                                                 .puntos(8000)
                                                 .activo(true)
-                                                .canjeable(false)
-                                                .origen("tienda")
-                                                .rating(4.6)
+                                                .canjeable(false).rating(4.6)
                                                 .build(),
                                 Product.builder()
                                                 .nombre("PlayStation 5")
@@ -157,9 +231,7 @@ public class DataSeeder implements CommandLineRunner {
                                                 .marca("Sony")
                                                 .puntos(55000)
                                                 .activo(true)
-                                                .canjeable(false)
-                                                .origen("tienda")
-                                                .rating(5.0)
+                                                .canjeable(false).rating(5.0)
                                                 .build(),
                                 Product.builder()
                                                 .nombre("PC Gamer ASUS ROG Strix")
@@ -173,9 +245,7 @@ public class DataSeeder implements CommandLineRunner {
                                                 .marca("ASUS")
                                                 .puntos(130000)
                                                 .activo(true)
-                                                .canjeable(false)
-                                                .origen("tienda")
-                                                .rating(4.9)
+                                                .canjeable(false).rating(4.9)
                                                 .build(),
                                 Product.builder()
                                                 .nombre("Silla Gamer Secretlab Titan")
@@ -189,9 +259,7 @@ public class DataSeeder implements CommandLineRunner {
                                                 .marca("Secretlab")
                                                 .puntos(35000)
                                                 .activo(true)
-                                                .canjeable(true)
-                                                .origen("tienda")
-                                                .rating(4.8)
+                                                .canjeable(true).rating(4.8)
                                                 .build(),
                                 Product.builder()
                                                 .nombre("Mouse Gamer Logitech G502 HERO")
@@ -205,9 +273,7 @@ public class DataSeeder implements CommandLineRunner {
                                                 .marca("Logitech")
                                                 .puntos(5000)
                                                 .activo(true)
-                                                .canjeable(true)
-                                                .origen("tienda")
-                                                .rating(4.7)
+                                                .canjeable(true).rating(4.7)
                                                 .build(),
                                 Product.builder()
                                                 .nombre("Mousepad Razer Goliathus Extended Chroma")
@@ -221,9 +287,7 @@ public class DataSeeder implements CommandLineRunner {
                                                 .marca("Razer")
                                                 .puntos(3000)
                                                 .activo(true)
-                                                .canjeable(true)
-                                                .origen("tienda")
-                                                .rating(4.6)
+                                                .canjeable(true).rating(4.6)
                                                 .build(),
                                 Product.builder()
                                                 .nombre("Polera Gamer Personalizada 'Level-Up'")
@@ -237,19 +301,75 @@ public class DataSeeder implements CommandLineRunner {
                                                 .marca("Level-Up")
                                                 .puntos(1500)
                                                 .activo(true)
-                                                .canjeable(true)
-                                                .origen("tienda")
-                                                .rating(4.5)
+                                                .canjeable(true).rating(4.5)
                                                 .build());
 
                 // Add products individually if they don't exist
                 for (Product product : products) {
                         if (productRepository.findAll().stream()
                                         .noneMatch(p -> p.getCodigo().equals(product.getCodigo()))) {
-                                productRepository.save(product);
+                                productRepository.save(Objects.requireNonNull(product));
                                 System.out.println("Product seeded: " + product.getCodigo());
                         }
                 }
-                System.out.println("Products seeding completed");
+        }
+
+        private void seedBlogs() {
+                try {
+                        if (blogRepository.count() >= 0) {
+                                blogRepository.deleteAll();
+                                List<Blog> blogs = List.of(
+                                                Blog.builder()
+                                                                .tipo("evento")
+                                                                .titulo("Gran Torneo de Apertura 2025")
+                                                                .descripcion(
+                                                                                "Únete al evento de esports más grande del año. Competencias de Valorant, LoL y más.")
+                                                                .fecha(LocalDate.of(2025, 1, 15))
+                                                                .horaInicio("10:00")
+                                                                .horaFin("22:00")
+                                                                .direccion("Movistar Arena, Santiago")
+                                                                .ubicacionUrl(
+                                                                                "https://www.google.com/maps/search/?api=1&query=Movistar+Arena,+Santiago")
+                                                                .imagen("/images/inicio/banner_inicio.png")
+                                                                .videoUrl("https://www.youtube.com/watch?v=C3GouGa0noM")
+                                                                .autor("LevelUp Esports")
+                                                                .categoria("Torneos")
+                                                                .puntos(1000)
+                                                                .estado("activo")
+                                                                .contenidoCompleto(
+                                                                                "El Gran Torneo de Apertura 2025 reunirá a los mejores equipos de la región...")
+                                                                .tiempoLectura(5)
+                                                                .etiquetas(List.of("esports", "torneo", "valorant",
+                                                                                "lol"))
+                                                                .build(),
+                                                Blog.builder()
+                                                                .tipo("evento")
+                                                                .titulo("Lanzamiento Nuevas Tecnologías")
+                                                                .descripcion(
+                                                                                "Descubre lo último en hardware gaming. Presentación exclusiva de nuevas tarjetas gráficas.")
+                                                                .fecha(LocalDate.of(2025, 2, 10))
+                                                                .horaInicio("18:30")
+                                                                .horaFin("21:00")
+                                                                .direccion("Costanera Center, Santiago")
+                                                                .ubicacionUrl(
+                                                                                "https://www.google.com/maps/search/?api=1&query=Costanera+Center,+Santiago")
+                                                                .imagen("/images/inicio/tarjeta_tecnologia.png")
+                                                                .videoUrl("https://www.youtube.com/watch?v=aJwMEQqwDSo")
+                                                                .autor("LevelUp Tech")
+                                                                .categoria("Tecnología")
+                                                                .puntos(500)
+                                                                .estado("programado")
+                                                                .contenidoCompleto(
+                                                                                "Ven a conocer de primera mano la nueva generación de hardware...")
+                                                                .tiempoLectura(3)
+                                                                .etiquetas(List.of("hardware", "lanzamiento",
+                                                                                "tecnologia"))
+                                                                .build());
+                                blogRepository.saveAll(Objects.requireNonNull(blogs));
+                                System.out.println("Blogs seeded");
+                        }
+                } catch (Exception e) {
+                        e.printStackTrace();
+                }
         }
 }

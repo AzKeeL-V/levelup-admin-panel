@@ -64,12 +64,12 @@ const Header = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex items-center space-x-8 ml-8">
             <Link
               to="/"
               className={`${isActive("/") && location.pathname === "/"
-                  ? "text-pink-500 font-medium"
-                  : "text-slate-300 hover:text-white"
+                ? "text-pink-500 font-medium"
+                : "text-slate-300 hover:text-white"
                 } transition-colors duration-200`}
             >
               Inicio
@@ -77,26 +77,26 @@ const Header = () => {
             <Link
               to="/catalogo"
               className={`${isActive("/catalogo")
-                  ? "text-pink-500 font-medium"
-                  : "text-slate-300 hover:text-white"
+                ? "text-pink-500 font-medium"
+                : "text-slate-300 hover:text-white"
                 } transition-colors duration-200`}
             >
               Catálogo
             </Link>
             <Link
-              to="/noticias"
-              className={`${isActive("/noticias")
-                  ? "text-pink-500 font-medium"
-                  : "text-slate-300 hover:text-white"
+              to="/comunidad"
+              className={`${isActive("/comunidad") || isActive("/blog") || isActive("/noticias")
+                ? "text-pink-500 font-medium"
+                : "text-slate-300 hover:text-white"
                 } transition-colors duration-200`}
             >
-              Noticias
+              Comunidad
             </Link>
             <Link
               to="/nosotros"
               className={`${isActive("/nosotros")
-                  ? "text-pink-500 font-medium"
-                  : "text-slate-300 hover:text-white"
+                ? "text-pink-500 font-medium"
+                : "text-slate-300 hover:text-white"
                 } transition-colors duration-200`}
             >
               Nosotros
@@ -183,15 +183,7 @@ const Header = () => {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                {/* Temporary Debug Logout Button */}
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={handleLogout}
-                  className="h-8 text-xs"
-                >
-                  Logout (Debug)
-                </Button>
+
               </div>
             ) : (
               <Button
@@ -233,8 +225,8 @@ const Header = () => {
                 to="/"
                 onClick={() => setIsMenuOpen(false)}
                 className={`${isActive("/") && location.pathname === "/"
-                    ? "text-pink-500 font-medium"
-                    : "text-slate-300 hover:text-white"
+                  ? "text-pink-500 font-medium"
+                  : "text-slate-300 hover:text-white"
                   } transition-colors duration-200`}
               >
                 Inicio
@@ -243,28 +235,28 @@ const Header = () => {
                 to="/catalogo"
                 onClick={() => setIsMenuOpen(false)}
                 className={`${isActive("/catalogo")
-                    ? "text-pink-500 font-medium"
-                    : "text-slate-300 hover:text-white"
+                  ? "text-pink-500 font-medium"
+                  : "text-slate-300 hover:text-white"
                   } transition-colors duration-200`}
               >
                 Catálogo
               </Link>
               <Link
-                to="/noticias"
+                to="/comunidad"
                 onClick={() => setIsMenuOpen(false)}
-                className={`${isActive("/noticias")
-                    ? "text-pink-500 font-medium"
-                    : "text-slate-300 hover:text-white"
+                className={`${isActive("/comunidad") || isActive("/blog") || isActive("/noticias")
+                  ? "text-pink-500 font-medium"
+                  : "text-slate-300 hover:text-white"
                   } transition-colors duration-200`}
               >
-                Noticias
+                Comunidad
               </Link>
               <Link
                 to="/nosotros"
                 onClick={() => setIsMenuOpen(false)}
                 className={`${isActive("/nosotros")
-                    ? "text-pink-500 font-medium"
-                    : "text-slate-300 hover:text-white"
+                  ? "text-pink-500 font-medium"
+                  : "text-slate-300 hover:text-white"
                   } transition-colors duration-200`}
               >
                 Nosotros

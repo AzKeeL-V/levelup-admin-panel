@@ -103,7 +103,13 @@ const ReceiptModal = ({ isOpen, onClose, order }: ReceiptModalProps) => {
                   <CreditCard className="w-4 h-4 text-slate-400" />
                   <div>
                     <p className="text-slate-400">Pago</p>
-                    <p className="text-white capitalize">{order.metodoPago}</p>
+                    <p className="text-white capitalize">
+                      {order.metodoPago === 'credito' ? 'Tarjeta de Crédito' :
+                        order.metodoPago === 'debito' ? 'Tarjeta de Débito' :
+                          order.metodoPago}
+                      {order.datosPago?.numeroTarjeta && ` (${order.datosPago.numeroTarjeta})`}
+                      {order.datosPago?.tipoTarjeta && !order.datosPago.numeroTarjeta && ` (${order.datosPago.tipoTarjeta})`}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -162,8 +168,6 @@ const ReceiptModal = ({ isOpen, onClose, order }: ReceiptModalProps) => {
                 <p>{order.direccionEnvio.calle} {order.direccionEnvio.numero}</p>
                 {order.direccionEnvio.apartamento && <p>{order.direccionEnvio.apartamento}</p>}
                 <p>{order.direccionEnvio.ciudad}, {order.direccionEnvio.region}</p>
-                <p>Código Postal: {order.direccionEnvio.codigoPostal}</p>
-                <p>Teléfono: {order.direccionEnvio.telefono}</p>
               </div>
             </CardContent>
           </Card>

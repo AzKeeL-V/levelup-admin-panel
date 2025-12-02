@@ -14,6 +14,7 @@ export interface Order {
   userId: string;
   userName: string;
   userEmail: string;
+  userRut?: string;
   items: OrderItem[];
   subtotal: number;
   descuentoDuoc: number;
@@ -25,6 +26,7 @@ export interface Order {
   fechaCreacion: string;
   fechaActualizacion: string;
   // Información de envío
+  // Información de envío
   direccionEnvio: {
     nombre: string;
     calle: string;
@@ -32,12 +34,10 @@ export interface Order {
     apartamento?: string;
     ciudad: string;
     region: string;
-    codigoPostal: string;
-    pais: string;
     telefono: string;
   };
   // Información de pago (simplificada para demo)
-  metodoPago: "tarjeta" | "transferencia" | "efectivo";
+  metodoPago: "tarjeta" | "credito" | "debito" | "transferencia" | "efectivo" | "mach" | "mercadopago";
   numeroOrden: string;
   notas?: string;
 

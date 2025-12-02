@@ -155,12 +155,25 @@ export class BlogRepository {
   }
 
   static async findById(id: string): Promise<BlogItem | null> {
+    try {
+      const response = await axiosInstance.get(`/blogs/${id}`);
+      return response.data;
+    } catch (err) {
+      // Fallback
+    }
     await new Promise(resolve => setTimeout(resolve, 200));
     const items = await this.getItems();
     return items.find(item => item.id === id) || null;
   }
 
   static async create(item: Omit<BlogItem, "id">): Promise<BlogItem> {
+    try {
+      const response = await axiosInstance.post('/blogs', item);
+      return response.data;
+    } catch (err) {
+      console.error("Error creating blog in backend, falling back to local:", err);
+    }
+
     await new Promise(resolve => setTimeout(resolve, 500));
     const items = await this.getItems();
 
@@ -175,6 +188,13 @@ export class BlogRepository {
   }
 
   static async update(id: string, itemData: Partial<BlogItem>): Promise<BlogItem> {
+    try {
+      const response = await axiosInstance.put(`/blogs/${id}`, itemData);
+      return response.data;
+    } catch (err) {
+      console.error("Error updating blog in backend, falling back to local:", err);
+    }
+
     await new Promise(resolve => setTimeout(resolve, 400));
     const items = await this.getItems();
     const index = items.findIndex(item => item.id === id);
@@ -189,6 +209,13 @@ export class BlogRepository {
   }
 
   static async delete(id: string): Promise<void> {
+    try {
+      await axiosInstance.delete(`/blogs/${id}`);
+      return;
+    } catch (err) {
+      console.error("Error deleting blog in backend, falling back to local:", err);
+    }
+
     await new Promise(resolve => setTimeout(resolve, 300));
     const items = await this.getItems();
     const filteredItems = items.filter(item => item.id !== id);

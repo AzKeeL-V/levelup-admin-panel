@@ -118,11 +118,16 @@ const Productos = () => {
   };
 
   const handleSaveProduct = async (product: any) => {
+    console.log("[Productos] handleSaveProduct called with:", product);
+    console.log("[Productos] - Image URL:", product.imagen);
+
     try {
       if (editingProduct) {
+        console.log("[Productos] Updating product:", editingProduct.codigo);
         await updateProduct(editingProduct.codigo, product);
         toast.success("Producto actualizado correctamente");
       } else {
+        console.log("[Productos] Adding new product");
         await addProduct(product);
         toast.success("Producto agregado correctamente");
       }
@@ -545,6 +550,7 @@ const Productos = () => {
         onOpenChange={setDialogOpen}
         product={editingProduct}
         onSave={handleSaveProduct}
+        categories={categories}
       />
 
       <ProductDetailModal

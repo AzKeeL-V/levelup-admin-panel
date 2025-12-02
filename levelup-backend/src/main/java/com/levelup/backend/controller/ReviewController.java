@@ -27,10 +27,22 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getProductReviews(productId));
     }
 
+    @GetMapping("/product/codigo/{productCodigo}")
+    public ResponseEntity<List<Review>> getProductReviewsByCodigo(@PathVariable String productCodigo) {
+        return ResponseEntity.ok(reviewService.getProductReviewsByCodigo(productCodigo));
+    }
+
     @PostMapping("/product/{productId}")
     public ResponseEntity<Review> createReview(@PathVariable Long productId, @RequestBody Review review) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         return ResponseEntity.ok(reviewService.createReview(email, productId, review));
+    }
+
+    @PostMapping("/product/codigo/{productCodigo}")
+    public ResponseEntity<Review> createReviewByCodigo(@PathVariable String productCodigo, @RequestBody Review review) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        return ResponseEntity.ok(reviewService.createReviewByCodigo(email, productCodigo, review));
     }
 }

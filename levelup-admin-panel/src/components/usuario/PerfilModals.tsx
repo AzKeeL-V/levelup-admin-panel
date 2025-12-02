@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,14 +31,15 @@ import {
   CreditCard,
   Edit,
   AlertCircle,
-  FileText
+  FileText,
+  Lock
 } from "lucide-react";
 import { useUsers } from "@/context/UserContext";
 import { useOrders } from "@/context/OrderContext";
 import { User as UserType } from "@/types/User";
 import { Order } from "@/types/Order";
 import { CHILEAN_REGIONS, getCitiesForRegion } from "@/utils/chileData";
-import { validateCardNumber, validateExpiryDate, validateCardHolder } from "@/utils/validationUtils";
+import { validateCardNumber, validateExpiryDate, validateCardHolder, formatCardNumber, formatExpiryDate, maskCardNumber } from "@/utils/validationUtils";
 import ReceiptModal from "@/components/ReceiptModal";
 
 interface PerfilModalsProps {
@@ -46,7 +49,6 @@ interface PerfilModalsProps {
   onUserUpdate: (updatedUser: UserType) => void;
 }
 
-// Modal para Información Personal
 export const PersonalInfoModal = ({ currentUser, onUserUpdate }: { currentUser: UserType; onUserUpdate: (updatedUser: UserType) => void }) => {
   const { updateUser } = useUsers();
   const [isOpen, setIsOpen] = useState(false);
@@ -54,13 +56,28 @@ export const PersonalInfoModal = ({ currentUser, onUserUpdate }: { currentUser: 
   const [formData, setFormData] = useState({
     nombre: currentUser.nombre || '',
     correo: currentUser.correo || '',
-    telefono: currentUser.telefono || ''
+    telefono: currentUser.telefono || '',
+    rut: currentUser.rut || ''
   });
   const [preferences, setPreferences] = useState({
     email: currentUser.preferenciasComunicacion?.email ?? true,
     sms: currentUser.preferenciasComunicacion?.sms ?? false
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  // Sync state with currentUser when it changes
+  useEffect(() => {
+    setFormData({
+      nombre: currentUser.nombre || '',
+      correo: currentUser.correo || '',
+      telefono: currentUser.telefono || '',
+      rut: currentUser.rut || ''
+    });
+    setPreferences({
+      email: currentUser.preferenciasComunicacion?.email ?? true,
+      sms: currentUser.preferenciasComunicacion?.sms ?? false
+    });
+  }, [currentUser]);
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
@@ -83,16 +100,17 @@ export const PersonalInfoModal = ({ currentUser, onUserUpdate }: { currentUser: 
         nombre: formData.nombre,
         correo: formData.correo,
         telefono: formData.telefono,
+        rut: formData.rut,
         preferenciasComunicacion: preferences
       };
 
       await updateUser(currentUser.id, updatedUser);
       onUserUpdate(updatedUser);
       setIsOpen(false);
-      alert("Información personal actualizada exitosamente");
+      toast.success("Información personal actualizada exitosamente");
     } catch (error) {
       console.error("Error updating profile:", error);
-      alert("Error al actualizar la información personal");
+      toast.error("Error al actualizar la información personal");
     } finally {
       setIsSaving(false);
     }
@@ -127,6 +145,16 @@ export const PersonalInfoModal = ({ currentUser, onUserUpdate }: { currentUser: 
                   className="bg-slate-700 border-slate-600 text-white"
                 />
                 {errors.nombre && <p className="text-red-400 text-sm mt-1">{errors.nombre}</p>}
+              </div>
+              <div>
+                <Label htmlFor="rut" className="text-slate-300">RUT</Label>
+                <Input
+                  id="rut"
+                  value={formData.rut}
+                  onChange={(e) => setFormData(prev => ({ ...prev, rut: e.target.value }))}
+                  className="bg-slate-700 border-slate-600 text-white"
+                  placeholder="12.345.678-9"
+                />
               </div>
               <div>
                 <Label htmlFor="telefono" className="text-slate-300">Teléfono</Label>
@@ -245,18 +273,17 @@ export const AddressesModal = ({ currentUser, onUserUpdate, open, onOpenChange }
 
   const handleAddOrUpdateAddress = async () => {
     if (addresses.length >= 3 && editingIndex === null) {
-      alert("No puedes agregar más de 3 direcciones");
+      toast.warning("No puedes agregar más de 3 direcciones");
       return;
     }
 
     if (!newAddress.calle || !newAddress.numero || !newAddress.ciudad || !newAddress.region) {
-      alert("Completa todos los campos requeridos");
+      toast.warning("Completa todos los campos requeridos");
       return;
     }
 
     const address = {
-      ...newAddress,
-      pais: "Chile"
+      ...newAddress
     };
 
     let updatedAddresses;
@@ -280,10 +307,10 @@ export const AddressesModal = ({ currentUser, onUserUpdate, open, onOpenChange }
         region: ''
       });
       setEditingIndex(null);
-      alert(editingIndex !== null ? "Dirección actualizada exitosamente" : "Dirección agregada exitosamente");
+      toast.success(editingIndex !== null ? "Dirección actualizada exitosamente" : "Dirección agregada exitosamente");
     } catch (error) {
       console.error("Error adding/updating address:", error);
-      alert("Error al agregar/actualizar la dirección");
+      toast.error("Error al agregar/actualizar la dirección");
     }
   };
 
@@ -294,10 +321,10 @@ export const AddressesModal = ({ currentUser, onUserUpdate, open, onOpenChange }
       const updatedUser = { ...currentUser, direcciones: updatedAddresses };
       onUserUpdate(updatedUser);
       setAddresses(updatedAddresses);
-      alert("Dirección eliminada exitosamente");
+      toast.success("Dirección eliminada exitosamente");
     } catch (error) {
       console.error("Error removing address:", error);
-      alert("Error al eliminar la dirección");
+      toast.error("Error al eliminar la dirección");
     }
   };
 
@@ -317,13 +344,12 @@ export const AddressesModal = ({ currentUser, onUserUpdate, open, onOpenChange }
     if (editingIndex === null) return;
 
     if (!newAddress.calle || !newAddress.numero || !newAddress.ciudad || !newAddress.region) {
-      alert("Completa todos los campos requeridos");
+      toast.warning("Completa todos los campos requeridos");
       return;
     }
 
     const updatedAddress = {
-      ...newAddress,
-      pais: "Chile"
+      ...newAddress
     };
 
     const updatedAddresses = [...addresses];
@@ -342,10 +368,10 @@ export const AddressesModal = ({ currentUser, onUserUpdate, open, onOpenChange }
         region: ''
       });
       setEditingIndex(null);
-      alert("Dirección actualizada exitosamente");
+      toast.success("Dirección actualizada exitosamente");
     } catch (error) {
       console.error("Error updating address:", error);
-      alert("Error al actualizar la dirección");
+      toast.error("Error al actualizar la dirección");
     }
   };
 
@@ -367,10 +393,10 @@ export const AddressesModal = ({ currentUser, onUserUpdate, open, onOpenChange }
       const updatedUser = { ...currentUser, direcciones: addresses };
       onUserUpdate(updatedUser);
       setModalOpen(false);
-      alert("Direcciones actualizadas exitosamente");
+      toast.success("Direcciones actualizadas exitosamente");
     } catch (error) {
       console.error("Error updating addresses:", error);
-      alert("Error al actualizar direcciones");
+      toast.error("Error al actualizar direcciones");
     } finally {
       setIsSaving(false);
     }
@@ -668,12 +694,14 @@ export const PaymentMethodsModal = ({ currentUser, onUserUpdate }: { currentUser
 
   // Sync state with currentUser when it changes
   useEffect(() => {
+    console.log('PaymentMethodsModal: currentUser changed:', currentUser);
+    console.log('PaymentMethodsModal: currentUser.metodosPago:', currentUser.metodosPago);
     setMetodosPago(currentUser.metodosPago || []);
     setMetodoPagoPreferido(currentUser.metodoPagoPreferido || 'tarjeta');
   }, [currentUser]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newMetodoPago, setNewMetodoPago] = useState({
-    tipo: "tarjeta" as "tarjeta" | "transferencia" | "efectivo" | "paypal",
+    tipo: "credito" as "credito" | "debito" | "transferencia" | "efectivo" | "paypal",
     tarjeta: {
       numero: '',
       fechaExpiracion: '',
@@ -687,12 +715,12 @@ export const PaymentMethodsModal = ({ currentUser, onUserUpdate }: { currentUser
 
   const handleAddMetodoPago = () => {
     if (metodosPago.length >= 3) {
-      alert("No puedes agregar más de 3 métodos de pago");
+      toast.warning("No puedes agregar más de 3 métodos de pago");
       return;
     }
 
     // Validations
-    if (newMetodoPago.tipo === 'tarjeta') {
+    if (newMetodoPago.tipo === 'credito' || newMetodoPago.tipo === 'debito') {
       const errors: { numero?: string; fechaExpiracion?: string; titular?: string } = {};
 
       if (!newMetodoPago.tarjeta.numero.trim()) {
@@ -717,12 +745,12 @@ export const PaymentMethodsModal = ({ currentUser, onUserUpdate }: { currentUser
       if (Object.keys(errors).length > 0) return;
     } else if (newMetodoPago.tipo === 'transferencia') {
       if (!newMetodoPago.banco || !newMetodoPago.cuenta) {
-        alert("Completa todos los campos de la transferencia");
+        toast.warning("Completa todos los campos de la transferencia");
         return;
       }
     } else if (newMetodoPago.tipo === 'paypal') {
       if (!newMetodoPago.emailPaypal) {
-        alert("Ingresa tu email de PayPal");
+        toast.warning("Ingresa tu email de PayPal");
         return;
       }
     }
@@ -731,14 +759,19 @@ export const PaymentMethodsModal = ({ currentUser, onUserUpdate }: { currentUser
       id: Date.now().toString(),
       tipo: newMetodoPago.tipo,
       esPredeterminado: metodosPago.length === 0, // First one is default
-      ...(newMetodoPago.tipo === 'tarjeta' && { tarjeta: newMetodoPago.tarjeta }),
+      ...((newMetodoPago.tipo === 'credito' || newMetodoPago.tipo === 'debito') && {
+        tarjeta: {
+          ...newMetodoPago.tarjeta,
+          numero: maskCardNumber(newMetodoPago.tarjeta.numero)
+        }
+      }),
       ...(newMetodoPago.tipo === 'transferencia' && { banco: newMetodoPago.banco, cuenta: newMetodoPago.cuenta }),
       ...(newMetodoPago.tipo === 'paypal' && { emailPaypal: newMetodoPago.emailPaypal })
     };
 
     setMetodosPago(prev => [...prev, metodoPago]);
     setNewMetodoPago({
-      tipo: "tarjeta",
+      tipo: "credito",
       tarjeta: { numero: '', fechaExpiracion: '', titular: '' },
       banco: '',
       cuenta: '',
@@ -763,16 +796,21 @@ export const PaymentMethodsModal = ({ currentUser, onUserUpdate }: { currentUser
       const updatedUser = {
         ...currentUser,
         metodoPagoPreferido: defaultMetodo?.tipo || metodoPagoPreferido,
-        metodosPago
+        metodosPago: metodosPago.map(m => ({
+          ...m,
+          // Siempre enviamos ID como undefined para forzar la recreación en el backend
+          // Esto evita errores de "detached entity" al usar clear() + addAll() en JPA
+          id: undefined
+        }))
       };
 
       await updateUser(currentUser.id, updatedUser);
       onUserUpdate(updatedUser);
       setIsOpen(false);
-      alert("Métodos de pago actualizados exitosamente");
+      toast.success("Métodos de pago actualizados exitosamente");
     } catch (error) {
       console.error("Error updating payment methods:", error);
-      alert("Error al actualizar los métodos de pago");
+      toast.error("Error al actualizar los métodos de pago");
     } finally {
       setIsSaving(false);
     }
@@ -792,6 +830,9 @@ export const PaymentMethodsModal = ({ currentUser, onUserUpdate }: { currentUser
             <CreditCard className="w-5 h-5" />
             Métodos de Pago
           </DialogTitle>
+          <DialogDescription className="text-slate-400">
+            Gestiona tus tarjetas y cuentas bancarias para futuras compras.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -813,7 +854,7 @@ export const PaymentMethodsModal = ({ currentUser, onUserUpdate }: { currentUser
                         </Badge>
                         <span className="text-white font-medium capitalize">{metodo.tipo}</span>
                       </div>
-                      {metodo.tipo === 'tarjeta' && metodo.tarjeta && (
+                      {(metodo.tipo === 'tarjeta' || metodo.tipo === 'credito' || metodo.tipo === 'debito') && metodo.tarjeta && (
                         <p className="text-slate-400 text-sm">
                           **** **** **** {metodo.tarjeta.numero.slice(-4)} - {metodo.tarjeta.titular}
                         </p>
@@ -888,7 +929,8 @@ export const PaymentMethodsModal = ({ currentUser, onUserUpdate }: { currentUser
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-700 border-slate-600">
-                      <SelectItem value="tarjeta" className="text-white hover:bg-slate-600">Tarjeta de Crédito/Débito</SelectItem>
+                      <SelectItem value="credito" className="text-white hover:bg-slate-600">Tarjeta de Crédito</SelectItem>
+                      <SelectItem value="debito" className="text-white hover:bg-slate-600">Tarjeta de Débito</SelectItem>
                       <SelectItem value="transferencia" className="text-white hover:bg-slate-600">Transferencia Bancaria</SelectItem>
                       <SelectItem value="efectivo" className="text-white hover:bg-slate-600">Efectivo</SelectItem>
                       <SelectItem value="paypal" className="text-white hover:bg-slate-600">PayPal</SelectItem>
@@ -897,18 +939,23 @@ export const PaymentMethodsModal = ({ currentUser, onUserUpdate }: { currentUser
                 </div>
 
                 {/* Card Details */}
-                {newMetodoPago.tipo === 'tarjeta' && (
+                {(newMetodoPago.tipo === 'credito' || newMetodoPago.tipo === 'debito') && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="md:col-span-2">
                       <Label className="text-slate-300">Número de Tarjeta</Label>
                       <Input
                         value={newMetodoPago.tarjeta.numero}
-                        onChange={(e) => setNewMetodoPago(prev => ({
-                          ...prev,
-                          tarjeta: { ...prev.tarjeta, numero: e.target.value }
-                        }))}
-                        className="bg-slate-700 border-slate-600 text-white"
-                        placeholder="**** **** **** ****"
+                        onChange={(e) => {
+                          const formatted = formatCardNumber(e.target.value);
+                          setNewMetodoPago(prev => ({
+                            ...prev,
+                            tarjeta: { ...prev.tarjeta, numero: formatted }
+                          }));
+                          if (cardErrors.numero) setCardErrors(prev => ({ ...prev, numero: undefined }));
+                        }}
+                        className={`bg-slate-700 border-slate-600 text-white ${cardErrors.numero ? 'border-red-500' : ''}`}
+                        placeholder="0000 0000 0000 0000"
+                        maxLength={19}
                       />
                       {cardErrors.numero && <p className="text-red-400 text-sm mt-1">{cardErrors.numero}</p>}
                     </div>
@@ -916,12 +963,17 @@ export const PaymentMethodsModal = ({ currentUser, onUserUpdate }: { currentUser
                       <Label className="text-slate-300">Fecha de Expiración</Label>
                       <Input
                         value={newMetodoPago.tarjeta.fechaExpiracion}
-                        onChange={(e) => setNewMetodoPago(prev => ({
-                          ...prev,
-                          tarjeta: { ...prev.tarjeta, fechaExpiracion: e.target.value }
-                        }))}
-                        className="bg-slate-700 border-slate-600 text-white"
+                        onChange={(e) => {
+                          const formatted = formatExpiryDate(e.target.value);
+                          setNewMetodoPago(prev => ({
+                            ...prev,
+                            tarjeta: { ...prev.tarjeta, fechaExpiracion: formatted }
+                          }));
+                          if (cardErrors.fechaExpiracion) setCardErrors(prev => ({ ...prev, fechaExpiracion: undefined }));
+                        }}
+                        className={`bg-slate-700 border-slate-600 text-white ${cardErrors.fechaExpiracion ? 'border-red-500' : ''}`}
                         placeholder="MM/YY"
+                        maxLength={5}
                       />
                       {cardErrors.fechaExpiracion && <p className="text-red-400 text-sm mt-1">{cardErrors.fechaExpiracion}</p>}
                     </div>
@@ -929,11 +981,14 @@ export const PaymentMethodsModal = ({ currentUser, onUserUpdate }: { currentUser
                       <Label className="text-slate-300">Titular de la Tarjeta</Label>
                       <Input
                         value={newMetodoPago.tarjeta.titular}
-                        onChange={(e) => setNewMetodoPago(prev => ({
-                          ...prev,
-                          tarjeta: { ...prev.tarjeta, titular: e.target.value }
-                        }))}
-                        className="bg-slate-700 border-slate-600 text-white"
+                        onChange={(e) => {
+                          setNewMetodoPago(prev => ({
+                            ...prev,
+                            tarjeta: { ...prev.tarjeta, titular: e.target.value }
+                          }));
+                          if (cardErrors.titular) setCardErrors(prev => ({ ...prev, titular: undefined }));
+                        }}
+                        className={`bg-slate-700 border-slate-600 text-white ${cardErrors.titular ? 'border-red-500' : ''}`}
                         placeholder="Nombre del titular"
                       />
                       {cardErrors.titular && <p className="text-red-400 text-sm mt-1">{cardErrors.titular}</p>}
@@ -1068,7 +1123,7 @@ export const ChangePasswordModal = ({ currentUser, onUserUpdate }: { currentUser
       onUserUpdate(updatedUser);
       setIsOpen(false);
       setPasswords({ current: "", new: "", confirm: "" });
-      alert("Contraseña actualizada exitosamente");
+      toast.success("Contraseña actualizada exitosamente");
     } catch (error) {
       console.error("Error updating password:", error);
       setError("Error al actualizar la contraseña");
@@ -1080,15 +1135,9 @@ export const ChangePasswordModal = ({ currentUser, onUserUpdate }: { currentUser
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full border-slate-600 text-slate-300 hover:bg-slate-700 mt-4">
-          <div className="flex items-center justify-center">
-            <div className="p-1 bg-slate-700 rounded mr-2">
-              <div className="w-1 h-1 bg-slate-400 rounded-full mb-0.5"></div>
-              <div className="w-1 h-1 bg-slate-400 rounded-full mb-0.5"></div>
-              <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
-            </div>
-            Cambiar Contraseña
-          </div>
+        <Button variant="outline" className="w-full border-slate-600 text-slate-300 hover:bg-slate-700">
+          <Lock className="w-4 h-4 mr-2" />
+          Cambiar Contraseña
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-md bg-slate-800 border-slate-700">

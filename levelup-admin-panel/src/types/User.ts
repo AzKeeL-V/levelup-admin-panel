@@ -17,21 +17,19 @@ export interface User {
     numero: string;
     apartamento?: string;
     ciudad: string;
-    comuna?: string;
     region: string;
-    codigoPostal?: string;
-    pais?: string;
   }[];
 
   // Información de pago (opcional, se pide en primera compra)
-  metodoPagoPreferido?: "tarjeta" | "transferencia" | "efectivo" | "paypal";
+  metodoPagoPreferido?: "tarjeta" | "credito" | "debito" | "transferencia" | "efectivo" | "paypal" | "mach" | "mercadopago";
   metodosPago?: {
     id: string;
-    tipo: "tarjeta" | "transferencia" | "efectivo" | "paypal";
+    tipo: "tarjeta" | "credito" | "debito" | "transferencia" | "efectivo" | "paypal" | "mach" | "mercadopago";
     tarjeta?: {
       numero: string; // Encriptado
       fechaExpiracion: string;
       titular: string;
+      franquicia?: string; // e.g. Visa, Mastercard
     };
     banco?: string; // Para transferencias
     cuenta?: string; // Para transferencias
@@ -45,7 +43,6 @@ export interface User {
     sms: boolean;
   };
   intereses: string[]; // Categorías favoritas
-  newsletter: boolean; // Indica si el usuario está suscrito al boletín
 
   // Seguridad y legal
   aceptaTerminos: boolean;

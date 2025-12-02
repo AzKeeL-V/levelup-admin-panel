@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Entity
 @Table(name = "products")
+@com.fasterxml.jackson.annotation.JsonIdentityInfo(generator = com.fasterxml.jackson.annotation.ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Product {
 
     @Id
@@ -46,9 +47,6 @@ public class Product {
 
     @Builder.Default
     private Boolean canjeable = false;
-
-    @Builder.Default
-    private String origen = "tienda"; // "tienda" | "recompensas"
 
     @Builder.Default
     private Double rating = 0.0;

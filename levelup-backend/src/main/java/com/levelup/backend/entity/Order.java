@@ -17,6 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "orders")
+@com.fasterxml.jackson.annotation.JsonIdentityInfo(generator = com.fasterxml.jackson.annotation.ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Order {
 
     @Id
@@ -58,22 +59,47 @@ public class Order {
             @AttributeOverride(name = "calle", column = @Column(name = "envio_calle")),
             @AttributeOverride(name = "numero", column = @Column(name = "envio_numero")),
             @AttributeOverride(name = "apartamento", column = @Column(name = "envio_apartamento")),
-            @AttributeOverride(name = "edificio", column = @Column(name = "envio_edificio")),
             @AttributeOverride(name = "ciudad", column = @Column(name = "envio_ciudad")),
-            @AttributeOverride(name = "comuna", column = @Column(name = "envio_comuna")),
-            @AttributeOverride(name = "region", column = @Column(name = "envio_region")),
-            @AttributeOverride(name = "codigoPostal", column = @Column(name = "envio_codigo_postal")),
-            @AttributeOverride(name = "pais", column = @Column(name = "envio_pais"))
+            @AttributeOverride(name = "region", column = @Column(name = "envio_region"))
     })
     private Address direccionEnvio;
 
     private String metodoPago;
 
     @Column(nullable = false)
+    @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime fechaCreacion;
+
+    @Column(columnDefinition = "TEXT")
+    private String notas;
+
+    @Column(unique = true, nullable = false)
+    private String numeroOrden;
+
+    private String creadoPor; // "usuario" | "admin"
+    private Long adminId;
+    private String adminNombre;
 
     @PrePersist
     protected void onCreate() {
         fechaCreacion = LocalDateTime.now();
+        fechaActualizacion = LocalDateTime.now();
+        if (numeroOrden == null) {
+            // Generar número de orden único: ORD-YYYYMMDD-XXXXX
+            String timestamp = LocalDateTime.now().format(
+                    java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd"));
+            String random = String.format("%05d", (int) (Math.random() * 100000));
+            numeroOrden = "ORD-" + timestamp + "-" + random;
+        }
     }
+
+    @PreUpdate
+    protected void onUpdate() {
+        fechaActualizacion = LocalDateTime.now();
+    }
+
+    @Column
+    @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY)
+    private LocalDateTime fechaActualizacion;
 }

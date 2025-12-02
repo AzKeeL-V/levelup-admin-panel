@@ -12,52 +12,50 @@ export class OrderRepository {
     }
   }
 
-  static async update(id: string, orderData: Partial<Order>): Promise<Order> {
+  static async update(id: number, updates: Partial<Order>): Promise<Order> {
     try {
-      const response = await axiosInstance.put(`/orders/${id}`, orderData);
+      console.log(`OrderRepository: Updating order ${id} with data:`, updates);
+
+      const response = await axiosInstance.put(`/orders/${id}`, updates);
+      console.log("OrderRepository: Update success:", response.data);
       return response.data;
     } catch (error) {
-      console.error("Error updating order:", error);
+      console.error("OrderRepository: Error updating order:", error);
       throw error;
     }
   }
 
   static async findAll(): Promise<Order[]> {
     try {
-      // 1. Cargar datos de localStorage (donde se guardan los nuevos pedidos)
-      const STORAGE_KEY = 'levelup_orders';
-      const stored = localStorage.getItem(STORAGE_KEY);
-      const localOrders: Order[] = stored ? JSON.parse(stored) : [];
+      const response = await axiosInstance.get('/orders/all');
 
-      // 2. Cargar datos del JSON (pedidos históricos/ejemplo)
-      let jsonOrders: Order[] = [];
-      if (typeof fetch !== 'undefined') {
-        try {
-          const response = await fetch('/levelup_orders.json');
-          if (response.ok) {
-            jsonOrders = await response.json();
-          }
-        } catch (e) {
-          console.error("Error cargando JSON de órdenes:", e);
-        }
-      }
-
-      // 3. Merge inteligente
-      const mergedOrders = [...localOrders];
-      jsonOrders.forEach(jsonOrder => {
-        const exists = localOrders.some(o => o.id === jsonOrder.id);
-        if (!exists) {
-          mergedOrders.push(jsonOrder);
-        }
-      });
-
-      // 4. Guardar fusión para persistencia
-      if (mergedOrders.length > localOrders.length) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(mergedOrders));
-      }
-
-      return mergedOrders;
-
+      return response.data.map((order: any) => ({
+        ...order,
+        numeroOrden: order.numeroOrden || `#ORD-${order.id}`,
+        userName: order.user?.nombre || "Usuario Desconocido",
+        userEmail: order.user?.email || order.user?.correo || "Sin email",
+        userRut: order.user?.rut || "",
+        userId: order.user?.id?.toString() || "",
+        total: typeof order.total === 'number' ? order.total : parseFloat(order.total) || 0,
+        puntosGanados: order.puntosGanados || 0,
+        puntosUsados: order.puntosUsados || 0,
+        fechaCreacion: order.fechaCreacion,
+        fechaActualizacion: order.fechaActualizacion || order.fechaCreacion, // Fallback since backend doesn't have this field yet
+        direccionEnvio: {
+          ...order.direccionEnvio,
+          telefono: order.direccionEnvio?.telefono || order.user?.telefono || "Sin teléfono"
+        },
+        items: (order.items || []).map((item: any) => ({
+          id: item.id?.toString() || Math.random().toString(),
+          productId: item.product?.id?.toString() || "",
+          productName: item.product?.nombre || "Producto Desconocido",
+          productImage: item.product?.imagen || "/placeholder.svg",
+          quantity: item.quantity || 0,
+          unitPrice: item.price || 0,
+          totalPrice: (item.price || 0) * (item.quantity || 0),
+          puntosGanados: 0 // Backend doesn't seem to send this per item explicitly in the simplified view
+        }))
+      }));
     } catch (error) {
       console.error('Error fetching all orders:', error);
       throw error;
@@ -69,9 +67,64 @@ export class OrderRepository {
     try {
       // Si existe backend, usa axios
       try {
-        const response = await axiosInstance.post('/orders', orderData);
-        return response.data;
-      } catch (err) {
+        // Transform payload for backend to match CreateOrderRequest DTO
+        const backendPayload = {
+          items: (orderData.items || []).reduce((acc: any, item: any) => {
+            const pId = Number(item.productId);
+            if (!isNaN(pId)) {
+              acc[pId] = item.quantity;
+            }
+            return acc;
+          }, {}),
+          direccionEnvio: orderData.direccionEnvio,
+          metodoPago: orderData.metodoPago,
+          subtotal: orderData.subtotal || 0,
+          descuentoDuoc: orderData.descuentoDuoc || 0,
+          descuentoPuntos: orderData.descuentoPuntos || 0,
+          total: orderData.total || 0,
+          puntosUsados: orderData.puntosUsados || 0,
+          puntosGanados: orderData.puntosGanados || 0,
+          notas: orderData.notas || null,
+          creadoPor: orderData.creadoPor,
+          adminId: orderData.adminId,
+          adminNombre: orderData.adminNombre
+        };
+
+        console.log("OrderRepository: Sending order to backend:", backendPayload);
+        const response = await axiosInstance.post('/orders', backendPayload);
+
+        // Map backend response to frontend Order format
+        const order = response.data;
+        return {
+          ...order,
+          id: order.id?.toString() || `order_${Date.now()}`,
+          numeroOrden: order.numeroOrden || `#ORD-${order.id}`,
+          userName: order.user?.nombre || "Usuario Desconocido",
+          userEmail: order.user?.email || order.user?.correo || "Sin email",
+          userRut: order.user?.rut || "",
+          userId: order.user?.id?.toString() || "",
+          total: typeof order.total === 'number' ? order.total : parseFloat(order.total) || 0,
+          puntosGanados: order.puntosGanados || 0,
+          puntosUsados: order.puntosUsados || 0,
+          estado: order.estado || 'pendiente',
+          fechaCreacion: order.fechaCreacion || new Date().toISOString(),
+          fechaActualizacion: order.fechaActualizacion || new Date().toISOString(),
+          metodoPago: order.metodoPago || orderData.metodoPago || 'efectivo',
+          direccionEnvio: order.direccionEnvio || orderData.direccionEnvio || {},
+          items: order.items ? order.items.map((item: any) => ({
+            id: item.id,
+            productId: item.product?.id?.toString() || "",
+            productName: item.product?.nombre || "Producto Desconocido",
+            productImage: item.product?.imagen || "/placeholder.svg",
+            quantity: item.quantity || 0,
+            unitPrice: item.price || 0,
+            totalPrice: (item.price || 0) * (item.quantity || 0),
+            puntosGanados: item.puntosGanados || 0
+          })) : [],
+          datosPago: orderData.datosPago // Preserve frontend-only payment details
+        };
+      } catch (err: any) {
+        console.error("OrderRepository: Backend creation failed, falling back to local:", err.response?.data || err.message);
         // Si falla axios (no hay backend), sigue con mock
       }
       // Mock: guarda en localStorage
@@ -95,6 +148,7 @@ export class OrderRepository {
       throw error;
     }
   }
+
   static async delete(id: string): Promise<void> {
     try {
       // Si existe backend, usa axios

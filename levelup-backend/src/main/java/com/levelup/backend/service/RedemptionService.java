@@ -31,7 +31,7 @@ public class RedemptionService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        Product product = productRepository.findById(productId)
+        Product product = productRepository.findById(java.util.Objects.requireNonNull(productId))
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
         if (user.getPuntos() < product.getPuntos()) {
@@ -53,6 +53,6 @@ public class RedemptionService {
                 .notas(redemptionDetails.getNotas())
                 .build();
 
-        return redemptionRepository.save(redemption);
+        return redemptionRepository.save(java.util.Objects.requireNonNull(redemption));
     }
 }

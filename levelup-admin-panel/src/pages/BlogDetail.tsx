@@ -30,14 +30,14 @@ const BlogDetail = () => {
 
   useEffect(() => {
     if (id && blogItems.length > 0) {
-      const post = blogItems.find(item => item.id === id);
+      const post = blogItems.find(item => String(item.id) === id);
       if (post) {
         setBlogPost(post);
 
         // Get related posts (same category, excluding current)
         const related = blogItems
           .filter(item =>
-            item.id !== id &&
+            String(item.id) !== id &&
             item.categoria === post.categoria &&
             item.estado === "activo"
           )
