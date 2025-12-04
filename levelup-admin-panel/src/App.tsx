@@ -38,6 +38,7 @@ import ForgotPassword from "./pages/usuario/ForgotPassword";
 import Perfil from "./pages/usuario/Perfil";
 import Wishlist from "./pages/usuario/Wishlist";
 import Pedido from "./pages/usuario/Pedido";
+import POS from "./pages/admin/POS";
 
 const queryClient = new QueryClient();
 
@@ -86,6 +87,7 @@ const App = () => (
                           <Route path="/admin/puntos" element={<PageTransition><AdminLayout><Puntos /></AdminLayout></PageTransition>} />
                           <Route path="/admin/blog" element={<PageTransition><AdminLayout><AdminBlog /></AdminLayout></PageTransition>} />
                           <Route path="/admin/noticias" element={<PageTransition><AdminLayout><AdminNoticias /></AdminLayout></PageTransition>} />
+                          <Route path="/admin/pos" element={<PageTransition><POS /></PageTransition>} />
 
                           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                           <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />

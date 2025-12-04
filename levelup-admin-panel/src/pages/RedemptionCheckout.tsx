@@ -79,7 +79,13 @@ const RedemptionCheckout = () => {
           (d: any) => d.id === selectedDireccion
         );
         if (dirSeleccionada) {
-          direccionEnvio = dirSeleccionada;
+          direccionEnvio = {
+            calle: dirSeleccionada.calle,
+            numero: dirSeleccionada.numero,
+            departamento: dirSeleccionada.apartamento || "",
+            ciudad: dirSeleccionada.ciudad,
+            region: dirSeleccionada.region
+          };
         }
       }
 
@@ -167,7 +173,7 @@ const RedemptionCheckout = () => {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Volver
           </Button>
-          <h1 className="text-3xl font-bold text-white">Canjear Producto</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-cyan-500 bg-clip-text text-transparent">Canjear Producto</h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

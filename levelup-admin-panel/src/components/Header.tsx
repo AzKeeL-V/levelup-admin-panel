@@ -60,7 +60,7 @@ const Header = () => {
               alt="LevelUp Logo"
               className="w-10 h-10 rounded-lg object-cover"
             />
-            <span className="text-xl font-bold text-pink-500">LevelUp</span>
+            <span className="text-xl font-bold bg-gradient-to-r from-pink-500 to-cyan-500 bg-clip-text text-transparent">LevelUp</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -68,7 +68,7 @@ const Header = () => {
             <Link
               to="/"
               className={`${isActive("/") && location.pathname === "/"
-                ? "text-pink-500 font-medium"
+                ? "bg-gradient-to-r from-pink-500 to-cyan-500 bg-clip-text text-transparent font-bold"
                 : "text-slate-300 hover:text-white"
                 } transition-colors duration-200`}
             >
@@ -77,7 +77,7 @@ const Header = () => {
             <Link
               to="/catalogo"
               className={`${isActive("/catalogo")
-                ? "text-pink-500 font-medium"
+                ? "bg-gradient-to-r from-pink-500 to-cyan-500 bg-clip-text text-transparent font-bold"
                 : "text-slate-300 hover:text-white"
                 } transition-colors duration-200`}
             >
@@ -86,7 +86,7 @@ const Header = () => {
             <Link
               to="/comunidad"
               className={`${isActive("/comunidad") || isActive("/blog") || isActive("/noticias")
-                ? "text-pink-500 font-medium"
+                ? "bg-gradient-to-r from-pink-500 to-cyan-500 bg-clip-text text-transparent font-bold"
                 : "text-slate-300 hover:text-white"
                 } transition-colors duration-200`}
             >
@@ -95,7 +95,7 @@ const Header = () => {
             <Link
               to="/nosotros"
               className={`${isActive("/nosotros")
-                ? "text-pink-500 font-medium"
+                ? "bg-gradient-to-r from-pink-500 to-cyan-500 bg-clip-text text-transparent font-bold"
                 : "text-slate-300 hover:text-white"
                 } transition-colors duration-200`}
             >

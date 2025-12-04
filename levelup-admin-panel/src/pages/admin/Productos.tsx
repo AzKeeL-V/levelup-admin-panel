@@ -29,6 +29,7 @@ import { toast } from "sonner";
 import { useProducts } from "@/context/ProductContext";
 
 const Productos = () => {
+  // Componente para gestión de productos
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [brandFilter, setBrandFilter] = useState<string>("all");

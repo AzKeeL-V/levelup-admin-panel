@@ -45,7 +45,11 @@ public class OrderController {
                 request.getTotal(),
                 request.getPuntosUsados(),
                 request.getPuntosGanados(),
-                request.getNotas()));
+                request.getNotas(),
+                request.getUserEmail(),
+                request.getUserName(),
+                request.getUserRut(),
+                request.getUserPhone()));
     }
 
     @PutMapping("/{id}")

@@ -191,7 +191,7 @@ const Catalogo = () => {
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-6xl md:text-7xl font-black text-white mb-6 drop-shadow-2xl">
               <span className="block">Catálogo</span>
-              <span className="block bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+              <span className="block bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 bg-clip-text text-transparent">
                 LevelUp
               </span>
             </h1>
@@ -221,22 +221,7 @@ const Catalogo = () => {
         {/* Filters and Search */}
         <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6 mb-8">
           {/* Rewards Store Toggle */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="default"
-                onClick={() => window.location.href = '/rewards-store'}
-                className="bg-pink-500 hover:bg-pink-600"
-              >
-                🏆 Tienda de Recompensas
-              </Button>
-              {showRewardsStore && (
-                <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-400">
-                  Canjea tus puntos por productos exclusivos
-                </Badge>
-              )}
-            </div>
-          </div>
+
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Search */}

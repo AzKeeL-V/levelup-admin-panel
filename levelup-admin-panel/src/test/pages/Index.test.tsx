@@ -58,7 +58,7 @@ vi.mock('@/context/BlogContext', () => ({
                 id: '1',
                 titulo: 'Event 1',
                 tipo: 'evento',
-                fecha: '2025-01-01',
+                fecha: '2026-01-01',
                 imagen: '/images/blog/event1.jpg',
                 descripcion: 'Test event 1',
                 estado: 'activo'
@@ -67,7 +67,7 @@ vi.mock('@/context/BlogContext', () => ({
                 id: '2',
                 titulo: 'Event 2',
                 tipo: 'evento',
-                fecha: '2025-01-02',
+                fecha: '2026-01-02',
                 imagen: '/images/blog/event2.jpg',
                 descripcion: 'Test event 2',
                 estado: 'activo'
@@ -76,7 +76,7 @@ vi.mock('@/context/BlogContext', () => ({
                 id: '3',
                 titulo: 'Event 3',
                 tipo: 'evento',
-                fecha: '2025-01-03',
+                fecha: '2026-01-03',
                 imagen: '/images/blog/event3.jpg',
                 descripcion: 'Test event 3',
                 estado: 'activo'
@@ -97,11 +97,20 @@ vi.mock('@/context/OrderContext', () => ({
 
 // Mock UserContext
 vi.mock('@/context/UserContext', () => ({
-    useUser: () => ({
+    useUsers: () => ({
         currentUser: null,
         login: vi.fn(),
         logout: vi.fn(),
     }),
+}));
+
+// Mock Header and Footer to avoid infinite loops/rendering issues
+vi.mock('@/components/Header', () => ({
+    default: () => <div data-testid="mock-header">Header</div>
+}));
+
+vi.mock('@/components/Footer', () => ({
+    default: () => <div data-testid="mock-footer">Footer</div>
 }));
 
 describe('Index Page', () => {

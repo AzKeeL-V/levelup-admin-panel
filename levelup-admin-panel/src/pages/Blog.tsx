@@ -94,7 +94,7 @@ const Blog = () => {
             <div className="text-center max-w-4xl mx-auto">
               <h1 className="text-6xl md:text-8xl lg:text-9xl font-black text-white mb-8 drop-shadow-2xl tracking-tight leading-none">
                 <span className="block">Blog</span>
-                <span className="block bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+                <span className="block bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 bg-clip-text text-transparent">
                   LevelUp
                 </span>
               </h1>

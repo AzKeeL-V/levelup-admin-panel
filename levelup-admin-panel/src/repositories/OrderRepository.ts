@@ -87,7 +87,11 @@ export class OrderRepository {
           notas: orderData.notas || null,
           creadoPor: orderData.creadoPor,
           adminId: orderData.adminId,
-          adminNombre: orderData.adminNombre
+          adminNombre: orderData.adminNombre,
+          userEmail: orderData.userEmail,
+          userName: orderData.userName,
+          userRut: orderData.userRut,
+          userPhone: orderData.direccionEnvio?.telefono || "Sin teléfono"
         };
 
         console.log("OrderRepository: Sending order to backend:", backendPayload);
@@ -111,7 +115,7 @@ export class OrderRepository {
           fechaActualizacion: order.fechaActualizacion || new Date().toISOString(),
           metodoPago: order.metodoPago || orderData.metodoPago || 'efectivo',
           direccionEnvio: order.direccionEnvio || orderData.direccionEnvio || {},
-          items: order.items ? order.items.map((item: any) => ({
+          items: (order.items && order.items.length > 0) ? order.items.map((item: any) => ({
             id: item.id,
             productId: item.product?.id?.toString() || "",
             productName: item.product?.nombre || "Producto Desconocido",
@@ -120,7 +124,7 @@ export class OrderRepository {
             unitPrice: item.price || 0,
             totalPrice: (item.price || 0) * (item.quantity || 0),
             puntosGanados: item.puntosGanados || 0
-          })) : [],
+          })) : (orderData.items || []),
           datosPago: orderData.datosPago // Preserve frontend-only payment details
         };
       } catch (err: any) {

@@ -68,6 +68,12 @@ const Carrito = () => {
       return;
     }
 
+    // Check if user is admin
+    if (currentUser.rol === 'admin') {
+      navigate("/admin/pos");
+      return;
+    }
+
     // Navigate to checkout page
     navigate("/checkout");
   };
@@ -82,7 +88,7 @@ const Carrito = () => {
             <div className="w-24 h-24 bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-6">
               <ShoppingCart className="w-12 h-12 text-slate-400" />
             </div>
-            <h1 className="text-3xl font-bold text-white mb-4">Tu carrito está vacío</h1>
+            <h1 className="text-3xl font-bold mb-4 bg-gradient-to-r from-pink-500 to-cyan-500 bg-clip-text text-transparent">Tu carrito está vacío</h1>
             <p className="text-slate-400 mb-8 max-w-md mx-auto">
               Parece que aún no has agregado productos a tu carrito. ¡Explora nuestro catálogo y encuentra lo que necesitas!
             </p>
@@ -136,7 +142,7 @@ const Carrito = () => {
               <span className="hidden sm:inline">Continuar comprando</span>
               <span className="sm:hidden">Volver</span>
             </Button>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">Carrito de Compras</h1>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-pink-500 to-cyan-500 bg-clip-text text-transparent">Carrito de Compras</h1>
           </div>
           <Badge variant="secondary" className="bg-purple-500/20 text-purple-400 self-start sm:self-center text-xs sm:text-sm">
             {cart.itemCount} producto{cart.itemCount !== 1 ? 's' : ''}

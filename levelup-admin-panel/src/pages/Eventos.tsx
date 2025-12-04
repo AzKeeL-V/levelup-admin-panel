@@ -69,7 +69,7 @@ const Eventos = () => {
   };
 
   const getTypeColor = (tipo: string) => {
-    const colors: {[key: string]: string} = {
+    const colors: { [key: string]: string } = {
       torneo: "bg-red-500/10 text-red-400 border-red-500/20",
       lanparty: "bg-blue-500/10 text-blue-400 border-blue-500/20",
       conferencia: "bg-purple-500/10 text-purple-400 border-purple-500/20",
@@ -108,8 +108,8 @@ const Eventos = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4 flex items-center justify-center gap-3">
-            <Gamepad2 className="w-10 h-10 text-purple-400" />
+          <h1 className="text-4xl font-bold mb-4 flex items-center justify-center gap-3 bg-gradient-to-r from-pink-500 to-cyan-500 bg-clip-text text-transparent">
+            <Gamepad2 className="w-10 h-10 text-pink-500" />
             Eventos Gamer
           </h1>
           <p className="text-xl text-slate-400 max-w-2xl mx-auto">

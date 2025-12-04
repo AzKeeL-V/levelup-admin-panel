@@ -14,9 +14,10 @@ interface ProductDialogProps {
   onOpenChange: (open: boolean) => void;
   product: Product | null;
   onSave: (product: Product) => Promise<void>;
+  categories?: string[];
 }
 
-export const ProductDialog = ({ open, onOpenChange, product, onSave }: ProductDialogProps) => {
+export const ProductDialog = ({ open, onOpenChange, product, onSave, categories = [] }: ProductDialogProps) => {
   const [formData, setFormData] = useState<Product>({
     codigo: "",
     categoria: "",

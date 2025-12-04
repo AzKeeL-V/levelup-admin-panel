@@ -430,7 +430,7 @@ const Checkout = () => {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Volver al carrito
           </Button>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">Checkout</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-pink-500 to-cyan-500 bg-clip-text text-transparent">Checkout</h1>
         </div>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">

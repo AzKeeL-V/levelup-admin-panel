@@ -164,7 +164,7 @@ const RewardsStore = () => {
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-6xl md:text-7xl font-black text-white mb-6 drop-shadow-2xl">
               <span className="block">Tienda de</span>
-              <span className="block bg-gradient-to-r from-yellow-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">
+              <span className="block bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 bg-clip-text text-transparent">
                 Recompensas
               </span>
             </h1>

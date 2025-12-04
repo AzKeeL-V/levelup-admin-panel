@@ -35,12 +35,35 @@ public class OrderService {
     }
 
     @Transactional
-    @SuppressWarnings("null")
-    public Order createOrder(String email, Map<Long, Integer> items, Address direccionEnvio, String metodoPago,
+
+    public Order createOrder(String authEmail, Map<Long, Integer> items, Address direccionEnvio, String metodoPago,
             String creadoPor, Long adminId, String adminNombre, BigDecimal subtotal, BigDecimal descuentoDuoc,
-            BigDecimal descuentoPuntos, BigDecimal total, Integer puntosUsados, Integer puntosGanados, String notas) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            BigDecimal descuentoPuntos, BigDecimal total, Integer puntosUsados, Integer puntosGanados, String notas,
+            String clientEmail, String clientName, String clientRut, String clientPhone) {
+
+        User user;
+
+        // Determine which user to associate with the order
+        if (clientEmail != null && !clientEmail.isEmpty()) {
+            // POS case: Client email provided
+            user = userRepository.findByEmail(clientEmail)
+                    .orElseGet(() -> {
+                        // Create new user if not found
+                        User newUser = new User();
+                        newUser.setEmail(clientEmail);
+                        newUser.setNombre(clientName != null ? clientName : "Cliente POS");
+                        newUser.setRut(clientRut);
+                        newUser.setTelefono(clientPhone);
+                        newUser.setPassword("pos_generated_password"); // Placeholder, should be handled better in prod
+                        newUser.setRole(com.levelup.backend.entity.Role.USER);
+                        newUser.setPuntos(0);
+                        return userRepository.save(newUser);
+                    });
+        } else {
+            // Standard case: Use authenticated user's email
+            user = userRepository.findByEmail(authEmail)
+                    .orElseThrow(() -> new RuntimeException("Usuario autenticado no encontrado"));
+        }
 
         Order order = Order.builder()
                 .user(user)
@@ -93,7 +116,7 @@ public class OrderService {
     }
 
     @Transactional
-    @SuppressWarnings("null")
+
     public Order updateOrder(Long id, Order orderUpdates) {
         System.out.println("OrderService: Updating order " + id);
         System.out.println("OrderService: Received updates: " + orderUpdates);

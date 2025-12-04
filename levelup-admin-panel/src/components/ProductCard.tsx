@@ -37,7 +37,7 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, featured = false, re
 
   return (
     <Card
-      className={`group overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/10 border-slate-800 bg-slate-900/50 backdrop-blur-sm cursor-pointer ${featured ? 'ring-2 ring-purple-500/50' : ''}`}
+      className={`group overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-cyan-500/10 border-slate-800 bg-slate-900/50 backdrop-blur-sm cursor-pointer ${featured ? 'ring-2 ring-pink-500/50' : ''}`}
       onClick={() => onViewDetails?.(product)}
     >
       <div className="relative overflow-hidden">
@@ -70,7 +70,7 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, featured = false, re
         <div className="space-y-2">
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-white text-sm leading-tight line-clamp-2 group-hover:text-purple-400 transition-colors">
+              <h3 className="font-semibold text-white text-sm leading-tight line-clamp-2 group-hover:text-cyan-400 transition-colors">
                 {product.nombre}
               </h3>
               <p className="text-xs text-slate-400 mt-1">{product.marca}</p>
@@ -102,7 +102,7 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, featured = false, re
               disabled={product.stock <= 0}
               className={`shadow-lg transition-all duration-300 ${product.stock <= 0
                 ? "bg-slate-700 text-slate-400 cursor-not-allowed hover:bg-slate-700"
-                : "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white hover:shadow-purple-500/25"
+                : "bg-gradient-to-r from-pink-500 to-cyan-500 hover:from-pink-600 hover:to-cyan-600 text-white hover:shadow-pink-500/25"
                 }`}
             >
               <ShoppingCart className="w-4 h-4 mr-1" />

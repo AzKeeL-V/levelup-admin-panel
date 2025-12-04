@@ -31,4 +31,10 @@ public class CreateOrderRequest {
     private String creadoPor;
     private Long adminId;
     private String adminNombre;
+
+    // Optional fields for client creation/lookup (POS)
+    private String userEmail;
+    private String userName;
+    private String userRut;
+    private String userPhone;
 }
